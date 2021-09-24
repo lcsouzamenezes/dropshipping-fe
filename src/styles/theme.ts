@@ -1,30 +1,40 @@
-import { extendTheme } from '@chakra-ui/react';
+import { extendTheme, ThemeConfig } from '@chakra-ui/react';
 
-export const theme = extendTheme({
+const config: ThemeConfig = {
+  initialColorMode: 'light',
+  useSystemColorMode: false,
+};
+
+const themeDetails = {
+  styles: {
+    global: (props) => ({
+      body: {
+        color: props.colorMode === 'light' ? 'gray.800' : 'whiteAlpha.900',
+      },
+      '.panel': {
+        bgColor: props.colorMode === 'light' ? 'gray.50' : 'gray.900',
+        borderRadius: '8',
+      },
+    }),
+  },
   colors: {
-    gray: {
-      '900': '#181b23',
-      '800': '#1f2029',
-      '700': '#353646',
-      '600': '#4b4d63',
-      '500': '#616480',
-      '400': '#797d9a',
-      '300': '#9699b0',
-      '200': '#b3b5c6',
-      '100': '#d1d2dc',
-      '50': '#eeeef2',
+    brand: {
+      50: '#e1ffed',
+      100: '#b6fad2',
+      200: '#8af4b6',
+      300: '#5ef09a',
+      400: '#35ec7e',
+      500: '#1fd265',
+      600: '#15a34e',
+      700: '#0b7537',
+      800: '#014620',
+      900: '#001907',
     },
   },
   fonts: {
     heading: 'Roboto',
     body: 'Roboto',
   },
-  styles: {
-    global: {
-      body: {
-        bg: 'gray.900',
-        color: 'gray.50',
-      },
-    },
-  },
-});
+};
+
+export const theme = extendTheme({ config, ...themeDetails });

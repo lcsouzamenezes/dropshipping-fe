@@ -2,59 +2,120 @@ import {
   Box,
   Heading,
   Button,
-  Icon,
   Divider,
   VStack,
   HStack,
   SimpleGrid,
   Flex,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { Header } from '../../components/Header';
 import { Sidebar } from '../../components/Sidebar';
-import { RiArrowLeftLine } from 'react-icons/ri';
 import { Input } from '../../components/Form/Input';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import Link from 'next/link';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
+type CreateUserFormData = {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+};
 
 export default function CreateUser() {
+  const createUserFormSchema = yup.object({
+    name: yup.string().required('Nome obrigatório'),
+    email: yup.string().required('E-mail obrigatório').email('E-mail inválido'),
+    password: yup
+      .string()
+      .required('Senha obrigatória')
+      .min(6, 'A senha deve conter no mínimo 6 caracteres'),
+    password_confirmation: yup
+      .string()
+      .required('A confirmação de senha é obrigatória')
+      .oneOf([null, yup.ref('password')], 'A senha informada não confere'),
+  });
+
+  const { handleSubmit, formState, register } = useForm<CreateUserFormData>({
+    resolver: yupResolver(createUserFormSchema),
+    mode: 'onBlur',
+  });
+
+  const handleCreateUserSubmit: SubmitHandler<CreateUserFormData> = async (
+    values
+  ) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    console.log(values);
+  };
+
+  const { errors } = formState;
+
   return (
     <Box>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />
-        <Box flex="1" borderRadius="8" bg="gray.800" p="8">
+        <Box
+          className="panel"
+          as="form"
+          onSubmit={handleSubmit(handleCreateUserSubmit)}
+          flex="1"
+          p={['6', '8']}
+        >
           <Flex mb="8" justify="space-between" align="center">
             <Heading size="lg" fontWeight="normal">
               Criação de Usuário
             </Heading>
-            <Button
-              href="/users/create"
-              as="a"
-              size="sm"
-              fontSize="sm"
-              leftIcon={<Icon as={RiArrowLeftLine} fontSize={20} />}
-              colorScheme="yellow"
-            >
-              Voltar
-            </Button>
           </Flex>
-          <Divider my="6" borderColor="gray.700" />
+          <Divider my="6" borderColor="gray.500" />
           <VStack spacing="8">
             <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
-              <Input label="Nome completo" name="name" type="text" />
-              <Input label="E-mail" name="email" type="email" />
+              <Input
+                label="Nome completo"
+                name="name"
+                type="text"
+                {...register('name')}
+                error={errors.name}
+              />
+              <Input
+                label="E-mail"
+                name="email"
+                type="email"
+                {...register('email')}
+                error={errors.email}
+              />
             </SimpleGrid>
             <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
-              <Input label="Senha" name="password" type="password" />
+              <Input
+                label="Senha"
+                name="password"
+                type="password"
+                {...register('password')}
+                error={errors.password}
+              />
               <Input
                 label="Confirmação de Senha"
-                name="password-confirmation"
+                name="password_confirmation"
                 type="password"
+                {...register('password_confirmation')}
+                error={errors.password_confirmation}
               />
             </SimpleGrid>
           </VStack>
           <Flex mt="8" justify="flex-end">
             <HStack spacing="4">
-              <Button colorScheme="whiteAlpha">Cancelar</Button>
-              <Button colorScheme="yellow">Salvar</Button>
+              <Link href="/users" passHref>
+                <Button as="a">Cancelar</Button>
+              </Link>
+              <Button
+                type="submit"
+                isLoading={formState.isSubmitting}
+                colorScheme="brand"
+              >
+                Salvar
+              </Button>
             </HStack>
           </Flex>
         </Box>

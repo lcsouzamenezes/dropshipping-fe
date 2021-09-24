@@ -5,6 +5,7 @@ import { NotificationsNav } from './NotificationsNav';
 import { SearchBox } from './SearchBox';
 import { useSideBarDrawer } from '../../context/SideBarDrawerContext';
 import { RiMenuLine } from 'react-icons/ri';
+import { ColorModeSwitch } from './ColorModeSwitch';
 
 export function Header() {
   const { onOpen } = useSideBarDrawer();
@@ -37,6 +38,7 @@ export function Header() {
 
       <Flex align="center" ml="auto">
         <NotificationsNav />
+        <ColorModeSwitch />
 
         <Profile showProfileDetails={isWideVersion} />
       </Flex>

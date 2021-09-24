@@ -10,7 +10,7 @@ export function Profile({ showProfileDetails = true }: ProfileProps) {
       {showProfileDetails && (
         <Box mr="4" textAlign="right">
           <Text>Jonathan Bertoldi</Text>
-          <Text color="gray.300" fontSize="sm">
+          <Text color="gray.500" fontSize="sm">
             jonathan@bebikes.com.br
           </Text>
         </Box>

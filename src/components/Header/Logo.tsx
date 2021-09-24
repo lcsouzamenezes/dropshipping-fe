@@ -9,7 +9,7 @@ export function Logo() {
       w="64"
     >
       DropShipping
-      <Text as="span" color="yellow.400">
+      <Text as="span" color="brand.500">
         .
       </Text>
     </Text>
