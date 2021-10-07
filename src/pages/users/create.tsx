@@ -7,24 +7,48 @@ import {
   HStack,
   SimpleGrid,
   Flex,
-  useBreakpointValue,
-} from '@chakra-ui/react';
-import { Header } from '../../components/Header';
-import { Sidebar } from '../../components/Sidebar';
-import { Input } from '../../components/Form/Input';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import Link from 'next/link';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+} from '@chakra-ui/react'
+import { Header } from '../../components/Header'
+import { Sidebar } from '../../components/Sidebar'
+import { Input } from '../../components/Form/Input'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import Link from 'next/link'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import { useMutation } from 'react-query'
+import { api } from '../../services/api/apiClient'
+import { queryClient } from '../../services/queryClient'
+import { useRouter } from 'next/router'
+import { withSSRAuth } from '../../utils/withSSRAuth'
 
 type CreateUserFormData = {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-};
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
+}
 
 export default function CreateUser() {
+  const router = useRouter()
+
+  const createUser = useMutation(
+    async (user: CreateUserFormData) => {
+      const response = await api.post('users', {
+        user: {
+          ...user,
+          created_at: new Date(),
+        },
+      })
+
+      return response.data.user
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('users')
+      },
+    }
+  )
+
   const createUserFormSchema = yup.object({
     name: yup.string().required('Nome obrigatório'),
     email: yup.string().required('E-mail obrigatório').email('E-mail inválido'),
@@ -36,21 +60,21 @@ export default function CreateUser() {
       .string()
       .required('A confirmação de senha é obrigatória')
       .oneOf([null, yup.ref('password')], 'A senha informada não confere'),
-  });
+  })
 
   const { handleSubmit, formState, register } = useForm<CreateUserFormData>({
     resolver: yupResolver(createUserFormSchema),
     mode: 'onBlur',
-  });
+  })
 
   const handleCreateUserSubmit: SubmitHandler<CreateUserFormData> = async (
     values
   ) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(values);
-  };
+    await createUser.mutateAsync(values)
+    router.push('/users')
+  }
 
-  const { errors } = formState;
+  const { errors } = formState
 
   return (
     <Box>
@@ -121,5 +145,16 @@ export default function CreateUser() {
         </Box>
       </Flex>
     </Box>
-  );
+  )
 }
+
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    return {
+      props: {},
+    }
+  },
+  {
+    roles: ['master'],
+  }
+)

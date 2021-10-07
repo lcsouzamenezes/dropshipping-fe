@@ -1,14 +1,25 @@
-import { createServer, Factory, Model, Response } from 'miragejs';
-import faker from 'faker';
+import {
+  ActiveModelSerializer,
+  createServer,
+  Factory,
+  Model,
+  Response,
+} from 'miragejs'
+import faker from 'faker'
 
 type User = {
-  name: string;
-  email: string;
-  created_at: string;
-};
+  name: string
+  email: string
+  created_at: string
+}
 
-export function makeServer() {
+export function makeServer({ environment = 'test' }) {
   const server = createServer({
+    environment,
+    serializers: {
+      application: ActiveModelSerializer,
+    },
+
     models: {
       user: Model.extend<Partial<User>>({}),
     },
@@ -16,33 +27,38 @@ export function makeServer() {
     factories: {
       user: Factory.extend({
         name(i: number) {
-          return `${faker.name.firstName()} ${faker.name.lastName()}`;
+          return `${faker.name.firstName()} ${faker.name.lastName()}`
         },
         email() {
-          return faker.internet.email().toLowerCase();
+          return faker.internet.email().toLowerCase()
         },
         createdAt() {
-          return faker.date.recent(10);
+          return faker.date.recent(10)
         },
       }),
     },
 
     seeds(server) {
-      server.createList('user', 200);
+      server.createList('user', 200)
     },
 
     routes() {
-      this.namespace = 'api';
-      this.timing = 750;
+      this.namespace = 'api'
+      this.timing = 750
 
       this.get('/users', (schema, request) => {
-        const { page = 1, per_page = 10 } = request.queryParams;
+        const { page = 1, per_page = 10 } = request.queryParams
 
-        const total = schema.all('user').length;
-        const pageStart = (Number(page) - 1) * Number(per_page);
-        const pageEnd = pageStart + Number(per_page);
+        const total = schema.all('user').length
+        const pageStart = (Number(page) - 1) * Number(per_page)
+        const pageEnd = pageStart + Number(per_page)
 
-        const users = schema.all('user').models.slice(pageStart, pageEnd);
+        const users = schema
+          .all('user')
+          .models.sort((a, b) => {
+            return (Number(a.id) + Number(b.id)) * -1
+          })
+          .slice(pageStart, pageEnd)
 
         return new Response(
           200,
@@ -52,14 +68,16 @@ export function makeServer() {
           {
             users,
           }
-        );
-      });
-      this.post('/users');
+        )
+      })
+      this.get('/users/:id')
+      this.post('/users')
 
-      this.namespace = '';
-      this.passthrough();
+      this.namespace = ''
+      this.passthrough()
+      this.passthrough('https://localhost:3333/**')
     },
-  });
+  })
 
-  return server;
+  return server
 }

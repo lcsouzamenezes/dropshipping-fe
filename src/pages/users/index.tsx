@@ -14,20 +14,48 @@ import {
   Text,
   useBreakpointValue,
   Spinner,
-} from '@chakra-ui/react';
-import Link from 'next/link';
-import { Pagination } from '../../components/Pagination';
-import { Header } from '../../components/Header';
-import { Sidebar } from '../../components/Sidebar';
-import { RiAddLine, RiPencilLine } from 'react-icons/ri';
-import { useUsers } from '../../services/mirage/hooks/useUsers';
-import { useState } from 'react';
+  Link as Chakralink,
+} from '@chakra-ui/react'
+import Link from 'next/link'
+import { Pagination } from '../../components/Pagination'
+import { Header } from '../../components/Header'
+import { Sidebar } from '../../components/Sidebar'
+import { RiAddLine } from 'react-icons/ri'
+import { useState } from 'react'
+import { api } from '../../services/api/apiClient'
+import { useQuery } from 'react-query'
+import { useUsers } from '../../services/api/hooks/useUsers'
+
+type User = {
+  id: string
+  email: string
+  createdAt: string
+}
+
+type fetchUserResponse = {
+  totalCount: number
+  users: User[]
+}
 
 export default function UserList() {
-  const [page, setPage] = useState(1);
-  const { data, isLoading, isFetching, error } = useUsers(page);
+  const [page, setPage] = useState(1)
 
-  const isWideVersion = useBreakpointValue({ base: false, lg: true });
+  const { isFetching, isLoading, error, data } = useUsers(page)
+
+  const isWideVersion = useBreakpointValue({ base: false, lg: true })
+
+  async function handlePrefetchUser(user_id: string) {
+    // await queryClient.prefetchQuery(
+    //   ['user', user_id],
+    //   async () => {
+    //     const response = await api.get(`users/${user_id}`)
+    //     return response.data
+    //   },
+    //   {
+    //     staleTime: 1000 * 60 * 10, //10 min
+    //   }
+    // )
+  }
 
   return (
     <Box>
@@ -83,7 +111,12 @@ export default function UserList() {
                       </Td>
                       <Td>
                         <Box>
-                          <Text fontWeight="bold">{user.name}</Text>
+                          <Chakralink
+                            onMouseEnter={() => handlePrefetchUser(user.id)}
+                            color="brand.500"
+                          >
+                            <Text fontWeight="bold">{user.name}</Text>
+                          </Chakralink>
                           <Text fontSize="sm" color="gray.500">
                             {user.email}
                           </Text>
@@ -104,5 +137,5 @@ export default function UserList() {
         </Box>
       </Flex>
     </Box>
-  );
+  )
 }

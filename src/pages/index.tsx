@@ -2,38 +2,64 @@ import {
   Flex,
   Button,
   Stack,
-  Image,
-  useColorModeValue,
-} from '@chakra-ui/react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { Input } from '../components/Form/Input';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+  Text,
+  useToast,
+  Icon,
+  Link as ChakraLink,
+} from '@chakra-ui/react'
+import Link from 'next/link'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { Input } from '../components/Form/Input'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import { useAuth } from '../context/AuthContext'
+import { withSSRGuest } from '../utils/withSSRGuest'
+import { RiShip2Fill } from 'react-icons/ri'
 
 interface SignInFormData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 const signInFormSchema = yup.object({
   email: yup.string().required('E-mail obrigatório').email('E-mail inválido'),
   password: yup.string().required('Senha obrigatória'),
-});
+})
 
 export default function SignIn() {
-  const bg = useColorModeValue('gray.100', 'gray.900');
+  const { signIn } = useAuth()
+  const toast = useToast()
 
   const { register, handleSubmit, formState } = useForm<SignInFormData>({
     resolver: yupResolver(signInFormSchema),
     mode: 'onBlur',
-  });
+  })
 
-  const { errors } = formState;
+  const { errors } = formState
 
   const handleSignIn: SubmitHandler<SignInFormData> = async (values) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(values);
-  };
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      await signIn(values)
+    } catch (error) {
+      toast.closeAll()
+      if (error.response?.data.code === 'invalid.credentials') {
+        toast({
+          position: 'top',
+          variant: 'left-accent',
+          title: 'E-mail ou Senha inválidos',
+          status: 'error',
+        })
+        return
+      }
+      toast({
+        position: 'top',
+        variant: 'left-accent',
+        title: 'Houve uma falha na requisição, por favor tente novamente',
+        status: 'error',
+      })
+    }
+  }
 
   return (
     <Flex
@@ -43,20 +69,25 @@ export default function SignIn() {
       align="center"
       justify="center"
     >
-      <Image
-        p="8"
-        src="/logo.svg"
-        fallbackSrc="https://via.placeholder.com/150x100"
-        alt="Logo da Empresa"
-      />
+      <Icon as={RiShip2Fill} fontSize="52" color="brand.500" />
+      <Text
+        fontSize={['md', '3xl']}
+        fontWeight="bold"
+        letterSpacing="tight"
+        mb="4"
+      >
+        DropShipping
+        <Text as="span" color="brand.500">
+          .
+        </Text>
+      </Text>
       <Flex
         as="form"
         width="100%"
         maxWidth={360}
         // bg="gray.800"
-        bg={bg}
+        className="panel"
         p="8"
-        borderRadius={8}
         flexDir="column"
         action="/dashboard"
         onSubmit={handleSubmit(handleSignIn)}
@@ -81,12 +112,31 @@ export default function SignIn() {
           colorScheme="brand"
           type="submit"
           mt="6"
+          mb="6"
           size="lg"
           isLoading={formState.isSubmitting}
         >
           Entrar
         </Button>
+        <Stack direction="row" justify="space-between">
+          <Link href="/register" passHref>
+            <ChakraLink as="a" fontSize="sm">
+              Esqueceu a senha?
+            </ChakraLink>
+          </Link>
+          <Link href="/forgot" passHref>
+            <ChakraLink as="a" fontSize="sm">
+              Criar Conta
+            </ChakraLink>
+          </Link>
+        </Stack>
       </Flex>
     </Flex>
-  );
+  )
 }
+
+export const getServerSideProps = withSSRGuest(async (ctx) => {
+  return {
+    props: {},
+  }
+})
