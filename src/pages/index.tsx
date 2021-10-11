@@ -62,13 +62,7 @@ export default function SignIn() {
   }
 
   return (
-    <Flex
-      w="100vw"
-      h="100vh"
-      direction="column"
-      align="center"
-      justify="center"
-    >
+    <Flex minHeight="100vh" direction="column" align="center" justify="center">
       <Icon as={RiShip2Fill} fontSize="52" color="brand.500" />
       <Text
         fontSize={['md', '3xl']}
@@ -124,7 +118,7 @@ export default function SignIn() {
               Esqueceu a senha?
             </ChakraLink>
           </Link>
-          <Link href="/forgot" passHref>
+          <Link href="/register" passHref>
             <ChakraLink as="a" fontSize="sm">
               Criar Conta
             </ChakraLink>
