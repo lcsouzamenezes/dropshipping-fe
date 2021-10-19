@@ -12,7 +12,7 @@ import { queryClient } from '../services/queryClient'
 //   makeServer({ environment: 'development' })
 // }
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
@@ -26,5 +26,3 @@ function MyApp({ Component, pageProps }: AppProps) {
     </AuthProvider>
   )
 }
-
-export default MyApp

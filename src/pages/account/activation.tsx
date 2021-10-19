@@ -38,7 +38,7 @@ export default function AccountsActivation({ query }) {
     setIsResending(true)
     setTimeout(() => {
       toast({
-        variant: 'left-accent',
+        variant: 'solid',
         status: 'success',
         title: 'E-mail reenviado com successo!',
         position: 'top',

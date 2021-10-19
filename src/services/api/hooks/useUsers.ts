@@ -50,7 +50,7 @@ export async function getUsers(
 }
 
 export function useUsers(page: number) {
-  return useQuery(['users', page], () => getUsers(page), {
+  return useQuery(['users', page], async () => await getUsers(page), {
     staleTime: 1000 * 60 * 5, //5 minutes
   })
 }

@@ -5,12 +5,15 @@ import {
   Button,
   Icon,
   Link as ChakraLink,
+  useToast,
 } from '@chakra-ui/react'
 import Link from 'next/link'
+import Router from 'next/router'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup.js'
 import * as yup from 'yup'
 import { Input } from '../components/Form/Input'
+import { api } from '../services/api/apiClient'
 
 interface RegisterFormData {
   company: string
@@ -24,7 +27,13 @@ const registerFormSchema = yup.object({
   company: yup.string().required('Nome obrigatório'),
   name: yup.string().required('Nome obrigatório'),
   email: yup.string().required('E-mail obrigatório').email('E-mail inválido'),
-  password: yup.string().required('Senha obrigatória'),
+  password: yup
+    .string()
+    .required('Senha obrigatória')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+      'A Senha deve conter pelo menos um caractere Minúsculo, um Maiúsculo, um Número e um Especial'
+    ),
   password_confirmation: yup
     .string()
     .required('Confirmação de Senha obrigatória')
@@ -36,16 +45,43 @@ export default function RegisterPage() {
     resolver: yupResolver(registerFormSchema),
     mode: 'onBlur',
   })
+  const toast = useToast()
 
   const { errors, isSubmitting } = formState
 
   const handleRegister: SubmitHandler<RegisterFormData> = async (values) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(values)
-        resolve('ok')
-      }, 1500)
-    })
+    try {
+      const data = { ...values, type: 'seller' }
+
+      await api.post('/accounts', data)
+
+      toast({
+        position: 'top',
+        isClosable: false,
+        variant: 'solid',
+        status: 'success',
+        title: 'Conta criada com successo',
+      })
+
+      Router.push('/')
+    } catch (error) {
+      if (error.response?.data.code === 'users.exists') {
+        toast({
+          position: 'top',
+          variant: 'solid',
+          status: 'error',
+          title: 'E-mail já cadastrado',
+          description: 'Por favor efetue login ou recupere a senha.',
+        })
+      } else {
+        toast({
+          position: 'top',
+          variant: 'solid',
+          title: 'Houve uma falha na requisição, por favor tente novamente.',
+          status: 'error',
+        })
+      }
+    }
   }
 
   return (
@@ -67,7 +103,8 @@ export default function RegisterPage() {
       </Text>
       <Flex
         as="form"
-        minWidth="380"
+        width="100%"
+        maxWidth={420}
         onSubmit={handleSubmit(handleRegister)}
         p="8"
         flexDirection="column"
@@ -75,13 +112,13 @@ export default function RegisterPage() {
       >
         <Stack spacing="4">
           <Input
-            label="Nome da Empresa"
+            label="Razão Social"
             name="company"
             error={errors.company}
             {...register('company')}
           />
           <Input
-            label="Nome"
+            label="Nome Completo"
             name="name"
             error={errors.name}
             {...register('name')}
@@ -95,12 +132,14 @@ export default function RegisterPage() {
           <Input
             label="Senha"
             name="password"
+            type="password"
             error={errors.password}
             {...register('password')}
           />
           <Input
             label="Confirmação de Senha"
             name="password_confirmation"
+            type="password"
             error={errors.password_confirmation}
             {...register('password_confirmation')}
           />

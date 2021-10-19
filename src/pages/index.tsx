@@ -27,7 +27,7 @@ const signInFormSchema = yup.object({
 })
 
 export default function SignIn() {
-  const { signIn } = useAuth()
+  const { signIn, isRedirecting } = useAuth()
   const toast = useToast()
 
   const { register, handleSubmit, formState } = useForm<SignInFormData>({
@@ -38,26 +38,48 @@ export default function SignIn() {
   const { errors } = formState
 
   const handleSignIn: SubmitHandler<SignInFormData> = async (values) => {
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
     try {
       await signIn(values)
     } catch (error) {
       toast.closeAll()
-      if (error.response?.data.code === 'invalid.credentials') {
-        toast({
-          position: 'top',
-          variant: 'left-accent',
-          title: 'E-mail ou Senha inválidos',
-          status: 'error',
-        })
-        return
+
+      switch (error.response?.data.code) {
+        case 'invalid.credentials':
+          toast({
+            position: 'top',
+            variant: 'solid',
+            title: 'E-mail ou Senha inválidos',
+            status: 'error',
+          })
+          break
+        case 'session.inactive_user':
+          toast({
+            position: 'top',
+            variant: 'solid',
+            title: 'E-mail não confirmado!',
+            description: 'Por favor ative sua conta antes de efetuar login.',
+            status: 'error',
+          })
+          break
+        case 'session.disabled_account':
+          toast({
+            position: 'top',
+            variant: 'solid',
+            title: 'Sua conta está desabilitada!',
+            description: 'Entre em contato para mais informações.',
+            status: 'error',
+          })
+          break
+
+        default:
+          toast({
+            position: 'top',
+            variant: 'solid',
+            title: 'Houve uma falha na requisição, por favor tente novamente.',
+            status: 'error',
+          })
+          break
       }
-      toast({
-        position: 'top',
-        variant: 'left-accent',
-        title: 'Houve uma falha na requisição, por favor tente novamente',
-        status: 'error',
-      })
     }
   }
 
@@ -78,7 +100,7 @@ export default function SignIn() {
       <Flex
         as="form"
         width="100%"
-        maxWidth={360}
+        maxWidth={420}
         // bg="gray.800"
         className="panel"
         p="8"
@@ -108,7 +130,7 @@ export default function SignIn() {
           mt="6"
           mb="6"
           size="lg"
-          isLoading={formState.isSubmitting}
+          isLoading={formState.isSubmitting || isRedirecting}
         >
           Entrar
         </Button>

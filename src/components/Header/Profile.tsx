@@ -7,6 +7,7 @@ import {
   MenuList,
   MenuItem,
   Icon,
+  Spinner,
 } from '@chakra-ui/react'
 import { useAuth } from '../../context/AuthContext'
 import { RiLogoutBoxLine } from 'react-icons/ri'
@@ -23,22 +24,26 @@ interface ProfileProps {
 export function Profile({ showProfileDetails = true }: ProfileProps) {
   const { user, signOut } = useAuth()
 
+  if (!user) {
+    return <Spinner color="brand.500" />
+  }
+
   return (
     <Menu id="profile-menu">
       <MenuButton>
         <Flex align="center">
           {showProfileDetails && (
             <Box mr="4" textAlign="right">
-              <Text>Jonathan Bertoldi</Text>
+              <Text>{user.name}</Text>
               <Text color="gray.500" fontSize="sm">
-                {user?.email}
+                {user.email}
               </Text>
             </Box>
           )}
           <Avatar
             size="md"
-            name="Jonathan Bertoldi"
-            src="https://github.com/jayremias.png"
+            name={user.name}
+            src={`https://avatars.dicebear.com/api/identicon/${user.name}.svg`}
           />
         </Flex>
       </MenuButton>

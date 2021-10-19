@@ -84,7 +84,7 @@ export function setupAPIClient(ctx = undefined) {
           }
         } else {
           signOut(ctx)
-          return Promise.reject(new AuthTokenError())
+          // return Promise.reject(new AuthTokenError())
         }
       }
       return Promise.reject(error)

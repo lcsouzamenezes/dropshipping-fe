@@ -10,6 +10,7 @@ import { setCookie, parseCookies, destroyCookie } from 'nookies'
 import { api } from '../services/api/apiClient'
 
 type User = {
+  name: string
   email: string
   roles: string[]
   permissions: string[]
@@ -17,6 +18,7 @@ type User = {
 
 type AuthenticationResponse = {
   user: {
+    name: string
     email: string
     roles: string[]
   }
@@ -33,6 +35,7 @@ type AuthContextData = {
   signIn(credentials: SignInCredentials): Promise<void>
   signOut(): void
   user: User
+  isRedirecting: boolean
   isAuthenticated: boolean
 }
 
@@ -61,6 +64,7 @@ export function signOut(ctx = undefined) {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User>(null)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const isAuthenticated = !!user
 
   useEffect(() => {
@@ -115,6 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       })
 
       setUser({
+        name: user.name,
         email,
         roles: user.roles,
         permissions: [],
@@ -122,14 +127,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       api.defaults.headers['Authorization'] = `Bearer ${token}`
 
-      Router.push('/dashboard')
+      setIsRedirecting(true)
+      await Router.push('/dashboard')
+      setIsRedirecting(false)
     } catch (error) {
       throw error
     }
   }
 
   return (
-    <AuthContext.Provider value={{ signIn, isAuthenticated, user, signOut }}>
+    <AuthContext.Provider
+      value={{ user, signIn, signOut, isAuthenticated, isRedirecting }}
+    >
       {children}
     </AuthContext.Provider>
   )

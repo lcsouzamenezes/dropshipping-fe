@@ -3,11 +3,12 @@ import {
   cookieStorageManager,
   localStorageManager,
 } from '@chakra-ui/react'
+import { NextPageContext } from 'next'
 
 import { theme } from '../styles/theme'
 
 export function ChakraProvider({ cookies, children }) {
-  const colorModeMananger =
+  let colorModeMananger =
     typeof cookies === 'string'
       ? cookieStorageManager(cookies)
       : localStorageManager
