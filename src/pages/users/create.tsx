@@ -151,7 +151,9 @@ export default function CreateUser() {
 export const getServerSideProps = withSSRAuth(
   async (ctx) => {
     return {
-      props: {},
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+      },
     }
   },
   {

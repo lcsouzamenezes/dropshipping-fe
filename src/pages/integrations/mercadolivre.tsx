@@ -44,6 +44,7 @@ export default function MercadolivrePage({
     } else if (success) {
       toast({
         status: 'success',
+        variant: 'solid',
         position: 'top',
         title: 'Conta adicionada com sucesso!',
       })
@@ -64,7 +65,7 @@ export default function MercadolivrePage({
             </Heading>
           </Flex>
           <Box>
-            <Alert mb="6" status="info" borderRadius="md">
+            <Alert mb="6" status="info" borderRadius="md" variant="left-accent">
               <AlertIcon />
               Certifique-se de estar autenticado na conta que deseja adicionar
               antes de clicar em Adicionar.
