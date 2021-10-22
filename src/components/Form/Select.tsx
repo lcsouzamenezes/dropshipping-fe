@@ -25,9 +25,8 @@ const SelectBase: ForwardRefRenderFunction<HTMLSelectElement, SelectProps> = (
         </FormLabel>
       )}
       <ChakraSelect
-        error
         variant="filled"
-        colorSchema="brand"
+        colorScheme="brand"
         focusBorderColor="brand.400"
         size="lg"
         ref={ref}

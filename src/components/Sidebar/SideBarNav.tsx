@@ -1,12 +1,13 @@
-import { Stack } from '@chakra-ui/react';
+import { Stack } from '@chakra-ui/react'
 import {
   RiContactsLine,
   RiDashboardLine,
   RiInputMethodLine,
   RiPlugLine,
-} from 'react-icons/ri';
-import { NavLink } from './NavLink';
-import { NavSection } from './NavSection';
+  RiPriceTag2Line,
+} from 'react-icons/ri'
+import { NavLink } from './NavLink'
+import { NavSection } from './NavSection'
 
 export function SideBarNave() {
   return (
@@ -14,6 +15,9 @@ export function SideBarNave() {
       <NavSection title="Geral">
         <NavLink icon={RiDashboardLine} href="/dashboard">
           Dashboard
+        </NavLink>
+        <NavLink icon={RiPriceTag2Line} href="/products">
+          Produtos
         </NavLink>
         <NavLink icon={RiContactsLine} href="/users">
           Usuários
@@ -25,5 +29,5 @@ export function SideBarNave() {
         </NavLink>
       </NavSection>
     </Stack>
-  );
+  )
 }
