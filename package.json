@@ -31,14 +31,20 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
+    "@testing-library/dom": "^8.10.1",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^12.1.2",
     "@types/faker": "^5.5.8",
     "@types/node": "^16.9.4",
     "@types/react": "^17.0.22",
+    "babel-jest": "^27.3.1",
     "eslint": "^5.16.0",
     "eslint-config-next": "11.1.2",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "faker": "^5.5.3",
+    "jest": "^27.3.1",
+    "jest-dom": "^4.0.0",
     "miragejs": "^0.1.41",
     "prettier": "^2.4.1",
     "typescript": "^4.4.3"
