@@ -1,9 +1,9 @@
-import { extendTheme, ThemeConfig } from '@chakra-ui/react';
+import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 
 const config: ThemeConfig = {
   initialColorMode: 'light',
   useSystemColorMode: false,
-};
+}
 
 const themeDetails = {
   styles: {
@@ -14,6 +14,9 @@ const themeDetails = {
       '.panel': {
         bgColor: props.colorMode === 'light' ? 'gray.50' : 'gray.900',
         borderRadius: '8',
+      },
+      'a.active': {
+        color: 'brand.500',
       },
     }),
   },
@@ -35,6 +38,6 @@ const themeDetails = {
     heading: 'Roboto',
     body: 'Roboto',
   },
-};
+}
 
-export const theme = extendTheme({ config, ...themeDetails });
+export const theme = extendTheme({ config, ...themeDetails })
