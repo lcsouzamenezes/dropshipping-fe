@@ -1,10 +1,4 @@
-import {
-  Flex,
-  Button,
-  useColorMode,
-  Icon,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { Flex, useColorMode, Icon, useColorModeValue } from '@chakra-ui/react'
 import { RiMoonLine, RiSunLine } from 'react-icons/ri'
 
 export function ColorModeSwitch() {
@@ -14,6 +8,7 @@ export function ColorModeSwitch() {
   return (
     <Flex mr={['6', '8']} pr={['6', '8']} py="1" borderRightWidth={1}>
       <Icon
+        data-testid="color-mode-switch"
         fontSize="20"
         cursor="pointer"
         onClick={toggleColorMode}
