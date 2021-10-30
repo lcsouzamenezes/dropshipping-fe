@@ -46,20 +46,20 @@ type User = {
   createdAt: string
 }
 
-type fetchUserResponse = {
-  totalCount: number
-  users: User[]
-}
-
-interface BlingAccounts {
+interface BlingAccount {
   id: string
   description: string
+}
+
+interface BlingProductImportResponse {
+  status: string
+  message: string
 }
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1)
   const [selectedBling, setSelectedBling] = useState<string>(undefined)
-  const toastRef = useRef<string | number>()
+  const [updateProductsBling, setUpdateProductsBling] = useState(true)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
 
@@ -83,18 +83,35 @@ export default function ProductsPage() {
 
   async function handleImportBlingProducts() {
     //maybe prefetch here
-    const bling = await api.get(`integrations/${selectedBling}`)
-    // const response = await blingApi(bling.id).get('produtos')
-    toastRef.current = toast({
-      position: 'bottom-right',
-      render: () => (
-        <Box p={3}>
-          <CircularProgress isIndeterminate color="brand.500" /> Carregando
-          produtos.
-        </Box>
-      ),
-      duration: null,
-    })
+    const { data: bling } = await api.get<BlingAccount>(
+      `integrations/${selectedBling}`
+    )
+
+    const { data: importationResult } =
+      await api.post<BlingProductImportResponse>('products/import/bling', {
+        integration: bling.id,
+        update: updateProductsBling,
+      })
+
+    if (importationResult.status == 'success') {
+      toast({
+        position: 'bottom-right',
+        title: 'Importação iniciada.',
+        description:
+          'Você recebera uma notificação quando o processo for concluído.',
+        status: 'success',
+      })
+    } else {
+      toast({
+        position: 'bottom-right',
+        title: 'Falha na Importação.',
+        description:
+          'Houve uma falha ao iniciar a importação. Por favor tente novamente mais tarde.',
+        status: 'error',
+      })
+    }
+
+    onClose()
   }
 
   return (
@@ -209,9 +226,11 @@ export default function ProductsPage() {
                     </option>
                   ))}
                 </Select>
-                <Checkbox defaultIsChecked>
-                  Atualizar produtos existentes <Badge>Nome</Badge>{' '}
-                  <Badge>Estoque</Badge> <Badge>Preço</Badge>
+                <Checkbox
+                  onChange={(e) => setUpdateProductsBling(e.target.checked)}
+                  defaultIsChecked
+                >
+                  Atualizar produtos existentes
                 </Checkbox>
               </Stack>
             </ModalBody>
@@ -234,3 +253,9 @@ export default function ProductsPage() {
     </Box>
   )
 }
+
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  return {
+    props: {},
+  }
+})
