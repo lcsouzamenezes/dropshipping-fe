@@ -18,6 +18,19 @@ const themeDetails = {
       'a.active': {
         color: 'brand.500',
       },
+      '&::-webkit-scrollbar': {
+        width: '2',
+        borderRadius: '8',
+        backgroundColor: `rgba(0, 0, 0, 0.05)`,
+      },
+      '&::-webkit-scrollbar-thumb': {
+        borderRadius: '8',
+        backgroundColor: `rgba(0, 0, 0, 0.1)`,
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        borderRadius: '8',
+        backgroundColor: `rgba(0, 0, 0, 0.2)`,
+      },
     }),
   },
   colors: {
