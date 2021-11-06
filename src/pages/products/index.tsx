@@ -1,6 +1,5 @@
 import {
   Box,
-  Badge,
   Flex,
   Heading,
   Button,
@@ -25,20 +24,21 @@ import {
   ModalCloseButton,
   useDisclosure,
   useToast,
-  CircularProgress,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
 import { RiAddLine, RiDownloadLine } from 'react-icons/ri'
-import { useRef, useState } from 'react'
-import { useUsers } from '../../services/api/hooks/useUsers'
+import { useState } from 'react'
 import { Select } from '@/components/Form/Select'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import { api } from '@/services/api/apiClient'
 import { Checkbox } from '@/components/Form/Checkbox'
+import { useProducts } from '@/services/api/hooks/useProducts'
 
 type User = {
   id: string
@@ -64,7 +64,7 @@ export default function ProductsPage() {
   const toast = useToast()
 
   const integrationsQuery = useIngrations('bling')
-  const { isFetching, isLoading, error, data } = useUsers(page)
+  const { isFetching, isLoading, error, data } = useProducts(page)
 
   const isWideVersion = useBreakpointValue({ base: false, lg: true })
 
@@ -139,7 +139,7 @@ export default function ProductsPage() {
               >
                 Importar
               </Button>
-              <Link href="/users/create" passHref>
+              <Link href="/products/create" passHref>
                 <Button
                   as="a"
                   size="sm"
@@ -168,13 +168,13 @@ export default function ProductsPage() {
                     <Th px={['4', '4', '6']} color="gray.500" width="8">
                       <Checkbox colorScheme="brand" />
                     </Th>
-                    <Th>Usuário</Th>
-                    {isWideVersion && <Th>Data de cadastro</Th>}
+                    <Th>Produto</Th>
+                    {isWideVersion && <Th>Estoque</Th>}
                     <Th width={['6', '6', '8']}></Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data.users.map((user) => (
+                  {data.products.map((user) => (
                     <Tr key={user.id}>
                       <Td px={['4', '4', '6']}>
                         <Checkbox colorScheme="brand" />
@@ -188,15 +188,23 @@ export default function ProductsPage() {
                             <Text fontWeight="bold">{user.name}</Text>
                           </Chakralink>
                           <Text fontSize="sm" color="gray.500">
-                            {user.email}
+                            {user.price}
                           </Text>
                         </Box>
                       </Td>
-                      {isWideVersion && <Td>{user.createdAt}</Td>}
+                      {isWideVersion && <Td>{user.stock}</Td>}
                     </Tr>
                   ))}
                 </Tbody>
               </Table>
+              {!data.products.length && (
+                <Box p={2}>
+                  <Alert status="info" display="flex" justifyContent="center">
+                    <AlertIcon />
+                    Nenhum dado encontrado.
+                  </Alert>
+                </Box>
+              )}
               <Pagination
                 totalCountOfRegisters={data.totalCount}
                 currentPage={page}
