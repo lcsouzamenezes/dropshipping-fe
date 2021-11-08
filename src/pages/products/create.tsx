@@ -14,17 +14,38 @@ import {
   InputRightElement,
   Icon,
   useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Image,
+  Spinner,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { RiSearchLine } from 'react-icons/ri'
-import { SubmitHandler, useForm, Controller } from 'react-hook-form'
+import {
+  RiSearchLine,
+  RiImageAddLine,
+  RiCloseLine,
+  RiExternalLinkLine,
+} from 'react-icons/ri'
+import {
+  SubmitHandler,
+  useForm,
+  Controller,
+  useFieldArray,
+} from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import { setupAPIClient } from '@/services/api/api'
 import { nextApi } from '@/services/api/nextApi'
+import { api } from '@/services/api/apiClient'
+import { useRouter } from 'next/router'
 
 type CreateProductFormData = {
   bling: string
@@ -33,6 +54,9 @@ type CreateProductFormData = {
   name: string
   price: string
   stock: number
+  images: Array<{
+    url: string
+  }>
 }
 
 const schema = yup.object({
@@ -53,6 +77,11 @@ const schema = yup.object({
     .number()
     .required('Estoque obrigatório')
     .typeError('EAN deve conter apenas dígitos'),
+  images: yup.array().of(
+    yup.object({
+      url: yup.string().url('URL inválido'),
+    })
+  ),
 })
 
 type Integration = {
@@ -70,7 +99,7 @@ interface GetBlingProductsResponse {
   gtin: string
   preco: string
   estoqueAtual: number
-  images?: Array<{
+  imagem?: Array<{
     link: string
     tipoArmazenamento: 'interno' | 'externo'
   }>
@@ -79,9 +108,15 @@ interface GetBlingProductsResponse {
 export default function CreateProductsPage({
   integrations,
 }: CreateProductsPageProps) {
+  const maxImages = 6
   const [disableFields, setDisableFields] = useState(true)
   const [isLoadingSku, setIsLoadingSku] = useState(false)
+  const [currentImage, SetCurrentImage] = useState<string>(undefined)
+  const [loadingModalImage, setLoadingModalImage] = useState(false)
+
+  const router = useRouter()
   const toast = useToast()
+
   const {
     register,
     handleSubmit,
@@ -94,22 +129,75 @@ export default function CreateProductsPage({
     resolver: yupResolver(schema),
     mode: 'onBlur',
   })
+  const {
+    fields,
+    append,
+    remove: removeImages,
+  } = useFieldArray({
+    control,
+    name: 'images',
+  })
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { errors } = formState
 
-  const handleCreateProductSubmit: SubmitHandler<CreateProductFormData> = (
-    data
-  ) => {
-    console.log(data)
+  const handleCreateProductSubmit: SubmitHandler<CreateProductFormData> =
+    async ({ name, bling: integration_id, sku, stock, price, ean, images }) => {
+      const product = {
+        name,
+        integration_id,
+        sku,
+        stock,
+        price: parseFloat(price.replace(',', '.')) * 100,
+        ean,
+        images,
+      }
+
+      try {
+        await api.post('/products', product)
+
+        toast({
+          status: 'success',
+          variant: 'solid',
+          position: 'top',
+          title: 'Produto cadastrado com sucesso',
+        })
+
+        router.push('/products')
+      } catch (error) {
+        if (error.response?.data.code === 'create_product:sku_in_use') {
+          toast({
+            status: 'error',
+            variant: 'solid',
+            position: 'top',
+            title: 'Falha ao cadastrar produto.',
+            description: 'SKU já cadastrado para esta conta Bling.',
+          })
+        } else {
+          toast({
+            status: 'error',
+            variant: 'solid',
+            position: 'top',
+            title: 'Falha ao cadastrar produto.',
+            description: 'Por favor tente novamente.',
+          })
+        }
+      }
+    }
+
+  function resetFields() {
+    setValue('ean', '')
+    setValue('name', '')
+    setValue('price', '0,00')
+    setValue('stock', 0)
+    removeImages()
+    SetCurrentImage(undefined)
   }
 
   async function handleSearchSKU() {
     setIsLoadingSku(true)
 
-    setValue('ean', '')
-    setValue('name', '')
-    setValue('price', '0,00')
-    setValue('stock', 0)
+    resetFields()
 
     try {
       const bling = integrations.find(
@@ -128,6 +216,10 @@ export default function CreateProductsPage({
       setValue('name', data.descricao)
       setValue('price', parseFloat(data.preco).toFixed(2).replace('.', ','))
       setValue('stock', data.estoqueAtual)
+
+      data.imagem.map((image) => {
+        append({ url: image.link })
+      })
     } catch (error) {
       if (error.response?.statusText === 'SKU not found') {
         setError('sku', {
@@ -147,18 +239,6 @@ export default function CreateProductsPage({
     }
   }
 
-  function handlePriceChange(value: string) {
-    console.log('')
-    // console.log(
-    //   <CurrencyFormat
-    //     value={value}
-    //     displayType={'text'}
-    //     thousandSeparator={true}
-    //     prefix={'$'}
-    //   />
-    // )
-  }
-
   return (
     <Layout>
       <Box
@@ -170,7 +250,7 @@ export default function CreateProductsPage({
       >
         <Flex mb="8" justify="space-between" align="center">
           <Heading size="lg" fontWeight="normal">
-            Criação de Usuário
+            Cadastro de Produto
           </Heading>
         </Flex>
         <Divider my="6" borderColor="gray.500" />
@@ -186,6 +266,8 @@ export default function CreateProductsPage({
                   label="Conta Bling"
                   placeholder="Selecione uma conta"
                   onChange={(e) => {
+                    resetFields()
+                    setValue('sku', '')
                     if (!e.target.value) {
                       setDisableFields(true)
                     } else {
@@ -287,6 +369,7 @@ export default function CreateProductsPage({
             />
 
             <Input
+              isReadOnly={true}
               isDisabled={disableFields}
               label="Quantidade em Estoque"
               name="stock"
@@ -297,17 +380,108 @@ export default function CreateProductsPage({
             />
           </SimpleGrid>
         </VStack>
+
+        <Flex my="6" justify="space-between" align="center"></Flex>
+        <VStack spacing="8">
+          {fields.map((item, index) => {
+            return (
+              <Flex key={item.id} width="100%">
+                <Input
+                  isDisabled={disableFields}
+                  label="URL da imagem"
+                  defaultValue=""
+                  {...register(`images.${index}.url`)}
+                  error={errors.images ? errors.images[index]?.url : undefined}
+                  name={`images.${index}.url`}
+                  type="text"
+                  pr="12rem"
+                  rightElement={
+                    <InputRightElement width="12rem" height="100%">
+                      <Button
+                        disabled={disableFields}
+                        mx="1"
+                        variant="ghost"
+                        color="gray"
+                        onClick={() => {
+                          setLoadingModalImage(true)
+                          SetCurrentImage(getValues(`images.${index}.url`))
+                          onOpen()
+                        }}
+                      >
+                        <Icon as={RiExternalLinkLine} fontSize="20" />
+                      </Button>
+                      <Button
+                        disabled={disableFields}
+                        leftIcon={<Icon as={RiCloseLine} fontSize="20" />}
+                        mx="1"
+                        colorScheme="red"
+                        onClick={() => removeImages(index)}
+                      >
+                        Remover
+                      </Button>
+                    </InputRightElement>
+                  }
+                />
+              </Flex>
+            )
+          })}
+          <Button
+            disabled={disableFields || getValues('images').length == maxImages}
+            alignSelf="flex-start"
+            colorScheme="green"
+            leftIcon={<Icon as={RiImageAddLine} fontSize={20} />}
+            onClick={() => {
+              append({ url: '' })
+            }}
+          >
+            Adicionar Imagem
+          </Button>
+        </VStack>
         <Flex mt="8" justify="flex-end">
           <HStack spacing="4">
             <Link href="/products" passHref>
               <Button as="a">Cancelar</Button>
             </Link>
-            <Button type="submit" isLoading={false} colorScheme="brand">
+            <Button
+              type="submit"
+              isLoading={formState.isSubmitting}
+              colorScheme="brand"
+            >
               Salvar
             </Button>
           </HStack>
         </Flex>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalBody pt="12" justify="center" align="center">
+            {loadingModalImage && <Spinner m="8" color="brand.500" />}
+            {currentImage && (
+              <Image
+                src={currentImage}
+                onLoad={() => setLoadingModalImage(false)}
+                loading="eager"
+                onError={() => {
+                  onClose()
+                  toast({
+                    status: 'error',
+                    description:
+                      'Falha ao carregar imagem. Verifique o URL e tente novamente.',
+                  })
+                }}
+              />
+            )}
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="brand" mr={3} onClick={onClose}>
+              Fechar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   )
 }

@@ -32,7 +32,7 @@ import { Pagination } from '../../components/Pagination'
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
 import { RiAddLine, RiDownloadLine } from 'react-icons/ri'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Select } from '@/components/Form/Select'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
@@ -58,13 +58,14 @@ interface BlingProductImportResponse {
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1)
+  const [perPage, SetPerPage] = useState(20)
   const [selectedBling, setSelectedBling] = useState<string>(undefined)
   const [updateProductsBling, setUpdateProductsBling] = useState(true)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
 
   const integrationsQuery = useIngrations('bling')
-  const { isFetching, isLoading, error, data } = useProducts(page)
+  const { isFetching, isLoading, error, data } = useProducts(page, perPage)
 
   const isWideVersion = useBreakpointValue({ base: false, lg: true })
 
@@ -169,30 +170,32 @@ export default function ProductsPage() {
                       <Checkbox colorScheme="brand" />
                     </Th>
                     <Th>Produto</Th>
+                    <Th>Preço</Th>
                     {isWideVersion && <Th>Estoque</Th>}
                     <Th width={['6', '6', '8']}></Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data.products.map((user) => (
-                    <Tr key={user.id}>
+                  {data.products.map((product) => (
+                    <Tr key={product.id}>
                       <Td px={['4', '4', '6']}>
                         <Checkbox colorScheme="brand" />
                       </Td>
                       <Td>
                         <Box>
                           <Chakralink
-                            onMouseEnter={() => handlePrefetchUser(user.id)}
+                            onMouseEnter={() => handlePrefetchUser(product.id)}
                             color="brand.500"
                           >
-                            <Text fontWeight="bold">{user.name}</Text>
+                            <Text fontWeight="bold">{product.name}</Text>
                           </Chakralink>
                           <Text fontSize="sm" color="gray.500">
-                            {user.price}
+                            SKU: {product.sku}
                           </Text>
                         </Box>
                       </Td>
-                      {isWideVersion && <Td>{user.stock}</Td>}
+                      <Td>{product.price}</Td>
+                      {isWideVersion && <Td>{product.stock}</Td>}
                     </Tr>
                   ))}
                 </Tbody>
@@ -206,6 +209,7 @@ export default function ProductsPage() {
                 </Box>
               )}
               <Pagination
+                registersPerPage={perPage}
                 totalCountOfRegisters={data.totalCount}
                 currentPage={page}
                 onPageChange={setPage}

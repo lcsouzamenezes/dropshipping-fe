@@ -1,21 +1,21 @@
-import { Stack, HStack, Text, Box } from '@chakra-ui/react';
-import { PaginationItem } from './PaginationItem';
+import { Stack, HStack, Text, Box } from '@chakra-ui/react'
+import { PaginationItem } from './PaginationItem'
 
 interface PaginationProps {
-  totalCountOfRegisters: number;
-  registersPerPage?: number;
-  currentPage?: number;
-  onPageChange: (page: number) => void;
+  totalCountOfRegisters: number
+  registersPerPage?: number
+  currentPage?: number
+  onPageChange: (page: number) => void
 }
 
-const siblingsCount = 1;
+const siblingsCount = 1
 
 function generatePagesArray(from: number, to: number) {
   return [...new Array(siblingsCount)]
     .map((_, i) => {
-      return from + i + 1;
+      return from + i + 1
     })
-    .filter((page) => page > 0);
+    .filter((page) => page > 0)
 }
 
 export function Pagination({
@@ -24,19 +24,19 @@ export function Pagination({
   registersPerPage = 10,
   onPageChange,
 }: PaginationProps) {
-  const lastPage = Math.ceil(totalCountOfRegisters / registersPerPage);
+  const lastPage = Math.ceil(totalCountOfRegisters / registersPerPage)
 
   const previousPages =
     currentPage > 1
       ? generatePagesArray(currentPage - 1 - siblingsCount, currentPage - 1)
-      : [];
+      : []
   const nextPages =
     currentPage < lastPage
       ? generatePagesArray(
           currentPage,
           Math.min(currentPage + siblingsCount, lastPage)
         )
-      : [];
+      : []
 
   return (
     <Stack
@@ -47,8 +47,9 @@ export function Pagination({
       spacing="6"
     >
       <Box>
-        <strong>0</strong> - <strong>{registersPerPage * currentPage}</strong>{' '}
-        de <strong>{totalCountOfRegisters}</strong>
+        <strong>{registersPerPage * (currentPage - 1) + 1}</strong> -{' '}
+        <strong>{registersPerPage * currentPage}</strong> de{' '}
+        <strong>{totalCountOfRegisters}</strong>
       </Box>
       <HStack spacing="2">
         {currentPage > 1 + siblingsCount && (
@@ -70,7 +71,7 @@ export function Pagination({
                 key={page}
                 number={page}
               />
-            );
+            )
           })}
 
         <PaginationItem
@@ -87,7 +88,7 @@ export function Pagination({
                 key={page}
                 number={page}
               />
-            );
+            )
           })}
 
         {currentPage + siblingsCount < lastPage && (
@@ -102,5 +103,5 @@ export function Pagination({
         )}
       </HStack>
     </Stack>
-  );
+  )
 }
