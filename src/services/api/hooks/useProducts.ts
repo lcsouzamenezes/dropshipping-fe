@@ -43,7 +43,7 @@ async function getProducts(
       sku: product.sku,
       ean: product.ean,
       name: product.name,
-      price: (product.price / 100).toLocaleString('pt-BR', {
+      price: product.price.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL',
       }),

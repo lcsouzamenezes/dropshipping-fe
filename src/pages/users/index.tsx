@@ -15,6 +15,7 @@ import {
   useBreakpointValue,
   Spinner,
   Link as Chakralink,
+  Badge,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
@@ -25,6 +26,8 @@ import { useState } from 'react'
 import { api } from '../../services/api/apiClient'
 import { useQuery } from 'react-query'
 import { useUsers } from '../../services/api/hooks/useUsers'
+import Template from '@/components/Layout'
+import { withSSRAuth } from 'utils/withSSRAuth'
 
 type User = {
   id: string
@@ -58,84 +61,98 @@ export default function UserList() {
   }
 
   return (
-    <Box>
-      <Header />
-      <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
-        <Sidebar />
-        <Box flex="1" className="panel" p="8">
-          <Flex mb="8" justify="space-between" align="center">
-            <Heading size="lg" fontWeight="normal">
-              Usuários
-              {isFetching && !isLoading && (
-                <Spinner color="gray.500" size="sm" ml="4" />
-              )}
-            </Heading>
-            <Link href="/users/create" passHref>
-              <Button
-                as="a"
-                size="sm"
-                fontSize="sm"
-                leftIcon={<Icon as={RiAddLine} fontSize={20} />}
-                colorScheme="brand"
-              >
-                Adicionar
-              </Button>
-            </Link>
+    <Template>
+      <Box flex="1" className="panel" p="8">
+        <Flex mb="8" justify="space-between" align="center">
+          <Heading size="lg" fontWeight="normal">
+            Usuários
+            {isFetching && !isLoading && (
+              <Spinner color="gray.500" size="sm" ml="4" />
+            )}
+          </Heading>
+          <Link href="/users/create" passHref>
+            <Button
+              as="a"
+              size="sm"
+              fontSize="sm"
+              leftIcon={<Icon as={RiAddLine} fontSize={20} />}
+              colorScheme="brand"
+            >
+              Adicionar
+            </Button>
+          </Link>
+        </Flex>
+        {isLoading ? (
+          <Flex justify="center">
+            <Spinner color="brand.500" />
           </Flex>
-          {isLoading ? (
-            <Flex justify="center">
-              <Spinner color="brand.500" />
-            </Flex>
-          ) : error ? (
-            <Flex justify="center">
-              <Text>Falha ao obter dados.</Text>
-            </Flex>
-          ) : (
-            <>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th px={['4', '4', '6']} color="gray.500" width="8">
+        ) : error ? (
+          <Flex justify="center">
+            <Text>Falha ao obter dados.</Text>
+          </Flex>
+        ) : (
+          <>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th px={['4', '4', '6']} color="gray.500" width="8">
+                    <Checkbox colorScheme="brand" />
+                  </Th>
+                  <Th>Usuário</Th>
+                  <Th>Status</Th>
+                  {isWideVersion && <Th>Data de cadastro</Th>}
+                  <Th width={['6', '6', '8']}></Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {data.users.map((user) => (
+                  <Tr key={user.id}>
+                    <Td px={['4', '4', '6']}>
                       <Checkbox colorScheme="brand" />
-                    </Th>
-                    <Th>Usuário</Th>
-                    {isWideVersion && <Th>Data de cadastro</Th>}
-                    <Th width={['6', '6', '8']}></Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {data.users.map((user) => (
-                    <Tr key={user.id}>
-                      <Td px={['4', '4', '6']}>
-                        <Checkbox colorScheme="brand" />
-                      </Td>
-                      <Td>
-                        <Box>
+                    </Td>
+                    <Td>
+                      <Box>
+                        <Link href={`/users/${user.id}`} passHref>
                           <Chakralink
                             onMouseEnter={() => handlePrefetchUser(user.id)}
                             color="brand.500"
                           >
                             <Text fontWeight="bold">{user.name}</Text>
                           </Chakralink>
-                          <Text fontSize="sm" color="gray.500">
-                            {user.email}
-                          </Text>
-                        </Box>
-                      </Td>
-                      {isWideVersion && <Td>{user.createdAt}</Td>}
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-              <Pagination
-                totalCountOfRegisters={data.totalCount}
-                currentPage={page}
-                onPageChange={setPage}
-              />
-            </>
-          )}
-        </Box>
-      </Flex>
-    </Box>
+                        </Link>
+                        <Text fontSize="sm" color="gray.500">
+                          {user.email}
+                        </Text>
+                      </Box>
+                    </Td>
+                    <Td>
+                      {user.active ? (
+                        <Badge colorScheme="green">Ativo</Badge>
+                      ) : (
+                        <Badge colorScheme="red">Inativo</Badge>
+                      )}
+                    </Td>
+                    {isWideVersion && <Td>{user.createdAt}</Td>}
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+            <Pagination
+              totalCountOfRegisters={data.totalCount}
+              currentPage={page}
+              onPageChange={setPage}
+            />
+          </>
+        )}
+      </Box>
+    </Template>
   )
 }
+
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  return {
+    props: {
+      cookies: ctx.req.headers.cookie ?? '',
+    },
+  }
+})

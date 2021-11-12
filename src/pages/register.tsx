@@ -15,6 +15,8 @@ import * as yup from 'yup'
 import { Input } from '../components/Form/Input'
 import { api } from '../services/api/apiClient'
 
+import { withSSRGuest } from '../utils/withSSRGuest'
+
 interface RegisterFormData {
   company: string
   name: string
@@ -161,3 +163,11 @@ export default function RegisterPage() {
     </Flex>
   )
 }
+
+const getServerSideProps = withSSRGuest(async (ctx) => {
+  return {
+    props: {
+      cookies: ctx.req.headers.cookie ?? '',
+    },
+  }
+})

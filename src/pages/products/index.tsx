@@ -32,13 +32,14 @@ import { Pagination } from '../../components/Pagination'
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
 import { RiAddLine, RiDownloadLine } from 'react-icons/ri'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Select } from '@/components/Form/Select'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import { api } from '@/services/api/apiClient'
 import { Checkbox } from '@/components/Form/Checkbox'
 import { useProducts } from '@/services/api/hooks/useProducts'
+import { queryClient } from '@/services/queryClient'
 
 type User = {
   id: string
@@ -69,17 +70,17 @@ export default function ProductsPage() {
 
   const isWideVersion = useBreakpointValue({ base: false, lg: true })
 
-  async function handlePrefetchUser(user_id: string) {
-    // await queryClient.prefetchQuery(
-    //   ['user', user_id],
-    //   async () => {
-    //     const response = await api.get(`users/${user_id}`)
-    //     return response.data
-    //   },
-    //   {
-    //     staleTime: 1000 * 60 * 10, //10 min
-    //   }
-    // )
+  async function handlePrefetchProduct(product_id: string) {
+    await queryClient.prefetchQuery(
+      ['product', product_id],
+      async () => {
+        const response = await api.get(`products/${product_id}`)
+        return response.data
+      },
+      {
+        staleTime: 1000 * 60 * 10, //10 min
+      }
+    )
   }
 
   async function handleImportBlingProducts() {
@@ -183,12 +184,16 @@ export default function ProductsPage() {
                       </Td>
                       <Td>
                         <Box>
-                          <Chakralink
-                            onMouseEnter={() => handlePrefetchUser(product.id)}
-                            color="brand.500"
-                          >
-                            <Text fontWeight="bold">{product.name}</Text>
-                          </Chakralink>
+                          <Link href={`/products/${product.id}`} passHref>
+                            <Chakralink
+                              onMouseEnter={() =>
+                                handlePrefetchProduct(product.id)
+                              }
+                              color="brand.500"
+                            >
+                              <Text fontWeight="bold">{product.name}</Text>
+                            </Chakralink>
+                          </Link>
                           <Text fontSize="sm" color="gray.500">
                             SKU: {product.sku}
                           </Text>

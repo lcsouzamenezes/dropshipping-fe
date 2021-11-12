@@ -1,10 +1,11 @@
 import { useQuery } from 'react-query'
 import { api } from '../apiClient'
 
-interface User {
+export interface User {
   id: string
   name: string
   email: string
+  active: boolean
   created_at: Date
 }
 
@@ -35,6 +36,7 @@ export async function getUsers(
       id: user.id,
       name: user.name,
       email: user.email,
+      active: user.active,
       createdAt: new Date(user.created_at).toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: 'long',

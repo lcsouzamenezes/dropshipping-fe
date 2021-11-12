@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 import { useSocket } from 'context/NotificationsContext'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { RiNotificationLine } from 'react-icons/ri'
 import { useNotification } from '@/services/api/hooks/useNotifications'
 import { Notification } from '@/services/api/hooks/useNotifications'

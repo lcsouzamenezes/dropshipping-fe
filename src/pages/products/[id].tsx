@@ -24,9 +24,10 @@ import {
   useDisclosure,
   Image,
   Spinner,
+  Text,
 } from '@chakra-ui/react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { FormEventHandler, useState } from 'react'
 import {
   RiSearchLine,
   RiImageAddLine,
@@ -49,70 +50,34 @@ import { useRouter } from 'next/router'
 import { useMutation } from 'react-query'
 import { queryClient } from '@/services/queryClient'
 import { AxiosError } from 'axios'
+import {
+  productYupSchema,
+  CreateProductFormData,
+  Integration,
+  GetBlingProductsResponse,
+} from './create'
 
-export type CreateProductFormData = {
-  bling: string
-  sku: string
-  ean: string
-  name: string
-  price: string
-  stock: number
-  images: Array<{
-    url: string
-  }>
-}
-
-export const productYupSchema = yup.object({
-  bling: yup.string(),
-  sku: yup.string().required('SKU obrigatório'),
-  ean: yup
-    .string()
-    .trim()
-    .matches(/^\d*$/, 'EAN deve conter apenas números')
-    .matches(/^(\d{13})?$/, 'EAN deve conter 13 caracteres'),
-  name: yup.string().trim().required('Nome obrigatório'),
-  price: yup
-    .string()
-    .required('Preço obrigatório')
-    .matches(/[^0,00]/, 'Valor deve ser maior que R$0,00')
-    .matches(/^(\d+)(,\d{0,2})?$/, 'Formato inválido'),
-  stock: yup
-    .number()
-    .required('Estoque obrigatório')
-    .typeError('EAN deve conter apenas dígitos'),
-  images: yup.array().of(
-    yup.object({
-      url: yup.string().url('URL inválido'),
-    })
-  ),
-})
-
-export type Integration = {
-  id: string
-  description: string
-  access_token: string
-}
-
-interface CreateProductsPageProps {
+interface EditPageProps {
+  product: {
+    id: string
+    name: string
+    sku: string
+    ean: string
+    price: number
+    stock: number
+    integration_id: string
+    images: Array<{
+      id: string
+      url: string
+    }>
+  }
   integrations: Integration[]
 }
 
-export interface GetBlingProductsResponse {
-  descricao: string
-  gtin: string
-  preco: string
-  estoqueAtual: number
-  imagem?: Array<{
-    link: string
-    tipoArmazenamento: 'interno' | 'externo'
-  }>
-}
+interface EditProductFormData extends CreateProductFormData {}
 
-export default function CreateProductsPage({
-  integrations,
-}: CreateProductsPageProps) {
+export default function EditPage({ product, integrations }: EditPageProps) {
   const maxImages = 6
-  const [disableFields, setDisableFields] = useState(true)
   const [isLoadingSku, setIsLoadingSku] = useState(false)
   const [currentImage, SetCurrentImage] = useState<string>(undefined)
   const [loadingModalImage, setLoadingModalImage] = useState(false)
@@ -120,6 +85,37 @@ export default function CreateProductsPage({
   const router = useRouter()
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
+
+  const updateProduct = useMutation(
+    async ({
+      name,
+      bling: integration_id,
+      sku,
+      stock,
+      price,
+      ean,
+      images,
+    }: EditProductFormData) => {
+      const product = {
+        name,
+        integration_id,
+        sku,
+        stock,
+        price: parseFloat(price.replace(',', '.')),
+        ean,
+        images,
+      }
+
+      const { id } = router.query
+
+      await api.put(`products/${id}`, product)
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('products')
+      },
+    }
+  )
 
   const {
     register,
@@ -129,12 +125,33 @@ export default function CreateProductsPage({
     getValues,
     setError,
     setValue,
-  } = useForm<CreateProductFormData>({
+  } = useForm<EditProductFormData>({
     resolver: yupResolver(productYupSchema),
     mode: 'onBlur',
+    defaultValues: {
+      ...product,
+      bling: product.integration_id,
+      price: Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        currencyDisplay: 'code',
+      })
+        .format(product.price)
+        .replace('BRL', '')
+        .trim(),
+    },
   })
 
   const { errors } = formState
+
+  function resetFields() {
+    setValue('ean', '')
+    setValue('name', '')
+    setValue('price', '0,00')
+    setValue('stock', 0)
+    removeImages()
+    SetCurrentImage(undefined)
+  }
 
   const {
     fields,
@@ -145,76 +162,29 @@ export default function CreateProductsPage({
     name: 'images',
   })
 
-  const createProduct = useMutation(
-    async ({
-      name,
-      bling: integration_id,
-      sku,
-      stock,
-      price,
-      ean,
-      images,
-    }: CreateProductFormData) => {
-      const product = {
-        name,
-        integration_id,
-        sku,
-        stock,
-        price: parseFloat(price.replace(',', '.')) * 100,
-        ean,
-        images,
-      }
+  const handleEditProductSubmit: SubmitHandler<EditProductFormData> = async (
+    values
+  ) => {
+    try {
+      await updateProduct.mutateAsync(values)
 
-      await api.post('/products', product)
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('products')
-      },
+      toast({
+        status: 'success',
+        variant: 'solid',
+        position: 'top',
+        title: 'Produto cadastrado com sucesso',
+      })
+
+      router.push('/products')
+    } catch (error) {
+      toast({
+        status: 'error',
+        variant: 'solid',
+        position: 'top',
+        title: 'Falha ao cadastrar produto.',
+        description: 'Por favor tente novamente.',
+      })
     }
-  )
-
-  const handleCreateProductSubmit: SubmitHandler<CreateProductFormData> =
-    async (values) => {
-      try {
-        await createProduct.mutateAsync(values)
-
-        toast({
-          status: 'success',
-          variant: 'solid',
-          position: 'top',
-          title: 'Produto cadastrado com sucesso',
-        })
-
-        router.push('/products')
-      } catch (error) {
-        if (error.response?.data.code === 'create_product:sku_in_use') {
-          toast({
-            status: 'error',
-            variant: 'solid',
-            position: 'top',
-            title: 'Falha ao cadastrar produto.',
-            description: 'SKU já cadastrado para esta conta Bling.',
-          })
-        } else {
-          toast({
-            status: 'error',
-            variant: 'solid',
-            position: 'top',
-            title: 'Falha ao cadastrar produto.',
-            description: 'Por favor tente novamente.',
-          })
-        }
-      }
-    }
-
-  function resetFields() {
-    setValue('ean', '')
-    setValue('name', '')
-    setValue('price', '0,00')
-    setValue('stock', 0)
-    removeImages()
-    SetCurrentImage(undefined)
   }
 
   async function handleSearchSKU() {
@@ -267,7 +237,7 @@ export default function CreateProductsPage({
       <Box
         className="panel"
         as="form"
-        onSubmit={handleSubmit(handleCreateProductSubmit)}
+        onSubmit={handleSubmit(handleEditProductSubmit)}
         flex="1"
         p={['6', '8']}
       >
@@ -286,16 +256,12 @@ export default function CreateProductsPage({
               render={({ field }) => (
                 <Select
                   {...field}
+                  isDisabled={true}
                   label="Conta Bling"
                   placeholder="Selecione uma conta"
                   onChange={(e) => {
                     resetFields()
                     setValue('sku', '')
-                    if (!e.target.value) {
-                      setDisableFields(true)
-                    } else {
-                      setDisableFields(false)
-                    }
                     field.onChange(e)
                   }}
                 >
@@ -307,34 +273,37 @@ export default function CreateProductsPage({
                 </Select>
               )}
             />
-            <Input
-              name="sku"
-              isDisabled={disableFields}
-              label="SKU"
-              type="text"
-              error={errors.sku}
-              {...register('sku')}
-              rightElement={
-                <InputRightElement
-                  right="1"
-                  top="50%"
-                  transform="translatey(-50%)"
-                >
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    colorScheme="teal"
-                    onClick={handleSearchSKU}
-                    isLoading={isLoadingSku}
+            <Box>
+              <Input
+                name="sku"
+                label="SKU"
+                type="text"
+                error={errors.sku}
+                {...register('sku')}
+                rightElement={
+                  <InputRightElement
+                    right="1"
+                    top="50%"
+                    transform="translatey(-50%)"
                   >
-                    <Icon as={RiSearchLine} />
-                  </Button>
-                </InputRightElement>
-              }
-            />
+                    <Button
+                      variant="ghost"
+                      size="lg"
+                      colorScheme="teal"
+                      onClick={handleSearchSKU}
+                      isLoading={isLoadingSku}
+                    >
+                      <Icon as={RiSearchLine} />
+                    </Button>
+                  </InputRightElement>
+                }
+              />
+              <Text mt="1" fontSize="sm" color="gray.500">
+                Certifique-se que o SKU é igual ao do ERP
+              </Text>
+            </Box>
 
             <Input
-              isDisabled={disableFields}
               {...register('ean')}
               error={errors.ean}
               label="EAN"
@@ -344,7 +313,6 @@ export default function CreateProductsPage({
           </SimpleGrid>
           <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
             <Input
-              isDisabled={disableFields}
               label="Nome"
               {...register('name')}
               error={errors.name}
@@ -360,7 +328,6 @@ export default function CreateProductsPage({
                 return (
                   <Input
                     {...field}
-                    isDisabled={disableFields}
                     leftElement={
                       <InputLeftElement
                         pointerEvents="none"
@@ -393,7 +360,6 @@ export default function CreateProductsPage({
 
             <Input
               isReadOnly={true}
-              isDisabled={disableFields}
               label="Quantidade em Estoque"
               name="stock"
               defaultValue={0}
@@ -410,7 +376,6 @@ export default function CreateProductsPage({
             return (
               <Flex key={item.id} width="100%">
                 <Input
-                  isDisabled={disableFields}
                   label="URL da imagem"
                   defaultValue=""
                   {...register(`images.${index}.url`)}
@@ -421,7 +386,6 @@ export default function CreateProductsPage({
                   rightElement={
                     <InputRightElement width="12rem" height="100%">
                       <Button
-                        disabled={disableFields}
                         mx="1"
                         variant="ghost"
                         color="gray"
@@ -434,7 +398,6 @@ export default function CreateProductsPage({
                         <Icon as={RiExternalLinkLine} fontSize="20" />
                       </Button>
                       <Button
-                        disabled={disableFields}
                         leftIcon={<Icon as={RiCloseLine} fontSize="20" />}
                         mx="1"
                         colorScheme="red"
@@ -449,7 +412,7 @@ export default function CreateProductsPage({
             )
           })}
           <Button
-            disabled={disableFields || getValues('images').length == maxImages}
+            disabled={getValues('images').length == maxImages}
             alignSelf="flex-start"
             colorScheme="green"
             leftIcon={<Icon as={RiImageAddLine} fontSize={20} />}
@@ -510,8 +473,10 @@ export default function CreateProductsPage({
 }
 
 export const getServerSideProps = withSSRAuth(async (ctx) => {
+  const { id } = ctx.params
   const api = setupAPIClient(ctx)
-  const { data } = await api.get('integrations', {
+  const { data: product } = await api.get(`products/${id}`)
+  const { data: integrations } = await api.get('integrations', {
     params: {
       type: 'bling',
     },
@@ -519,7 +484,8 @@ export const getServerSideProps = withSSRAuth(async (ctx) => {
 
   return {
     props: {
-      integrations: data,
+      product,
+      integrations,
     },
   }
 })

@@ -86,6 +86,8 @@ export const getServerSideProps = withSSRAuth(async (ctx) => {
   // const response = await apiClient.get('users/me');
 
   return {
-    props: {},
+    props: {
+      cookies: ctx.req.headers.cookie ?? '',
+    },
   }
 })

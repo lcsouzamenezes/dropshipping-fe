@@ -1,24 +1,13 @@
-import { Text, Icon, useBreakpointValue } from '@chakra-ui/react';
-import { RiShip2Fill } from 'react-icons/ri';
+import { useBreakpointValue } from '@chakra-ui/react'
+import { Flex, Image } from '@chakra-ui/react'
 
 export function Logo() {
-  const isWideVersion = useBreakpointValue({ base: false, lg: true });
+  const isWideVersion = useBreakpointValue({ base: false, lg: true })
 
   return (
-    <>
-      <Icon as={RiShip2Fill} fontSize="42" mr="2" color="brand.500" />
-
-      <Text
-        fontSize={['md', '3xl']}
-        fontWeight="bold"
-        letterSpacing="tight"
-        w="64"
-      >
-        {isWideVersion ? 'DropShipping' : 'DS'}
-        <Text as="span" color="brand.500">
-          .
-        </Text>
-      </Text>
-    </>
-  );
+    <Flex align="center" justify="center">
+      {isWideVersion && <Image src="/assets/logo/simbolo.svg" h="10" />}
+      <Image src="/assets/logo/tipografia.svg" h="8" ml="4" />
+    </Flex>
+  )
 }

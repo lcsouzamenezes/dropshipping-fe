@@ -6,6 +6,8 @@ import {
   useToast,
   Icon,
   Link as ChakraLink,
+  Image as ChakraImage,
+  Box,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -85,7 +87,10 @@ export default function SignIn() {
 
   return (
     <Flex minHeight="100vh" direction="column" align="center" justify="center">
-      <Icon as={RiShip2Fill} fontSize="52" color="brand.500" />
+      <Box mb={6}>
+        <ChakraImage w={[150, 200]} src="/assets/logo/logo.svg" alt="Outter" />
+      </Box>
+      {/* <Icon as={RiShip2Fill} fontSize="52" color="brand.500" />
       <Text
         fontSize={['md', '3xl']}
         fontWeight="bold"
@@ -96,7 +101,7 @@ export default function SignIn() {
         <Text as="span" color="brand.500">
           .
         </Text>
-      </Text>
+      </Text> */}
       <Flex
         as="form"
         width="100%"
@@ -153,6 +158,8 @@ export default function SignIn() {
 
 export const getServerSideProps = withSSRGuest(async (ctx) => {
   return {
-    props: {},
+    props: {
+      cookies: ctx.req.headers.cookie ?? '',
+    },
   }
 })
