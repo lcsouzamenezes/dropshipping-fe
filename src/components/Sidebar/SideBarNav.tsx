@@ -23,7 +23,7 @@ export function SideBarNave() {
           Usuários
         </NavLink>
       </NavSection>
-      <NavSection title="Automação">
+      <NavSection title="Configurações">
         <NavLink icon={RiPlugLine} href="/integrations">
           Integrações
         </NavLink>

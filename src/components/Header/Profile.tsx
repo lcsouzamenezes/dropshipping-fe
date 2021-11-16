@@ -8,9 +8,10 @@ import {
   MenuItem,
   Icon,
   Spinner,
+  Badge,
 } from '@chakra-ui/react'
 import { useAuth } from '../../context/AuthContext'
-import { RiLogoutBoxLine } from 'react-icons/ri'
+import { RiLogoutBoxLine, RiVipCrownFill, RiVipCrownLine } from 'react-icons/ri'
 import dynamic from 'next/dynamic'
 const Menu = dynamic(
   import('@chakra-ui/react').then((chakra) => chakra.Menu),
@@ -34,7 +35,12 @@ export function Profile({ showProfileDetails = true }: ProfileProps) {
         <Flex align="center">
           {showProfileDetails && (
             <Box mr="4" textAlign="right">
-              <Text>{user.name}</Text>
+              <Flex align="center" justify="flex-end">
+                {user.roles?.includes('master') && (
+                  <Icon mr={2} color="yellow.500" as={RiVipCrownFill} />
+                )}
+                <Text>{user.name}</Text>
+              </Flex>
               <Text color="gray.500" fontSize="sm">
                 {user.email}
               </Text>

@@ -164,12 +164,7 @@ export default function EditUserPage({ user }: EditUserPageProps) {
             />
           </SimpleGrid>
           <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
-            <Checkbox
-              {...register('active')}
-              defaultChecked
-              colorScheme="brand"
-              size="lg"
-            >
+            <Checkbox {...register('active')} colorScheme="brand" size="lg">
               Usuário Ativo
             </Checkbox>
           </SimpleGrid>

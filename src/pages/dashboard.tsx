@@ -80,14 +80,19 @@ export default function Dashboard() {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  // const apiClient = setupAPIClient(ctx);
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    // const apiClient = setupAPIClient(ctx);
 
-  // const response = await apiClient.get('users/me');
+    // const response = await apiClient.get('users/me');
 
-  return {
-    props: {
-      cookies: ctx.req.headers.cookie ?? '',
-    },
+    return {
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller', 'supplier'],
   }
-})
+)

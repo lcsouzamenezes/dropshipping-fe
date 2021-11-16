@@ -58,8 +58,9 @@ export default function SignIn() {
           toast({
             position: 'top',
             variant: 'solid',
-            title: 'E-mail não confirmado!',
-            description: 'Por favor ative sua conta antes de efetuar login.',
+            title: 'Usuário Inativo!',
+            description:
+              'Por favor ative sua conta ou entre em contato com um Administrador.',
             status: 'error',
           })
           break
