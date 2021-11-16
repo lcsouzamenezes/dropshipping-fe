@@ -10,6 +10,7 @@ import { setCookie, parseCookies, destroyCookie } from 'nookies'
 import { api } from '../services/api/apiClient'
 
 type User = {
+  id: string
   name: string
   email: string
   roles: string[]
@@ -18,6 +19,7 @@ type User = {
 
 type AuthenticationResponse = {
   user: {
+    id: string
     name: string
     email: string
     roles: string[]
@@ -119,6 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       })
 
       setUser({
+        id: user.id,
         name: user.name,
         email,
         roles: user.roles,

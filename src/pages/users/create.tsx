@@ -7,6 +7,7 @@ import {
   HStack,
   SimpleGrid,
   Flex,
+  useToast,
 } from '@chakra-ui/react'
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
@@ -32,6 +33,7 @@ type CreateUserFormData = {
 
 export default function CreateUser() {
   const router = useRouter()
+  const toast = useToast()
 
   const createUser = useMutation(
     async (user: CreateUserFormData) => {
@@ -75,8 +77,16 @@ export default function CreateUser() {
   const handleCreateUserSubmit: SubmitHandler<CreateUserFormData> = async (
     values
   ) => {
-    await createUser.mutateAsync(values)
-    router.push('/users')
+    try {
+      await createUser.mutateAsync(values)
+      toast({
+        status: 'success',
+        variant: 'solid',
+        position: 'top',
+        title: 'Usuário criado com successo',
+      })
+      router.push('/users')
+    } catch (error) {}
   }
 
   const { errors } = formState
