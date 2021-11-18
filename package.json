@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "NODE_OPTIONS='--inspect' next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest"
@@ -31,6 +31,7 @@
     "react-icons": "^4.2.0",
     "react-query": "^3.24.4",
     "react-text-mask": "^5.4.3",
+    "sharp": "^0.29.3",
     "socket.io-client": "^4.3.2",
     "yup": "^0.32.9"
   },
