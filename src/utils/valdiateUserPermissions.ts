@@ -12,7 +12,11 @@ export function validateUserHasPermissions(
   user: Pick<User, 'permissions' | 'roles'>,
   { permissions, roles }: Permissions
 ) {
-  if (permissions?.length > 0) {
+  if (user.roles.includes('master')) {
+    return true
+  }
+
+  if (permissions?.length) {
     const hasAllPermissions = permissions.every((permission) => {
       return user.permissions.includes(permission)
     })
@@ -22,7 +26,7 @@ export function validateUserHasPermissions(
     }
   }
 
-  if (roles?.length > 0) {
+  if (roles?.length) {
     const hasAllRoles = roles.some((permission) => {
       return user.roles.includes(permission)
     })

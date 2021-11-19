@@ -89,7 +89,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     if (token) {
       api
-        .get('/users/me')
+        .get('/users/me', {
+          params: {
+            permissions: true,
+          },
+        })
         .then((response) => {
           const { me } = response.data
           setUser(me)
