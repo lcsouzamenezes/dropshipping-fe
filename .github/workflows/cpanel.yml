@@ -51,4 +51,4 @@ jobs:
             cd ~/app
             npm install
             npm run build
-            pm2 restart outter-nextjs --update-env
+            pm2 reload outter-nextjs --update-env
