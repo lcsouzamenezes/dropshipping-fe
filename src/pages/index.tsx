@@ -2,12 +2,11 @@ import {
   Flex,
   Button,
   Stack,
-  Text,
   useToast,
-  Icon,
   Link as ChakraLink,
   Image as ChakraImage,
   Box,
+  useColorMode,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -16,7 +15,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useAuth } from '../context/AuthContext'
 import { withSSRGuest } from '../utils/withSSRGuest'
-import { RiShip2Fill } from 'react-icons/ri'
 
 interface SignInFormData {
   email: string
@@ -31,6 +29,7 @@ const signInFormSchema = yup.object({
 export default function SignIn() {
   const { signIn, isRedirecting } = useAuth()
   const toast = useToast()
+  const { colorMode } = useColorMode()
 
   const { register, handleSubmit, formState } = useForm<SignInFormData>({
     resolver: yupResolver(signInFormSchema),
@@ -87,9 +86,23 @@ export default function SignIn() {
   }
 
   return (
-    <Flex minHeight="100vh" direction="column" align="center" justify="center">
-      <Box mb={6}>
-        <ChakraImage w={[150, 200]} src="/assets/logo/logo.svg" alt="Outter" />
+    <Flex
+      minHeight="100vh"
+      minWidth={320}
+      direction="column"
+      align="center"
+      justify="center"
+    >
+      <Box mb={8}>
+        <ChakraImage
+          w={[150, 200]}
+          src={
+            colorMode === 'light'
+              ? '/assets/logo/logo.svg'
+              : '/assets/logo/logo-i.svg'
+          }
+          alt="Outter"
+        />
       </Box>
       {/* <Icon as={RiShip2Fill} fontSize="52" color="brand.500" />
       <Text
