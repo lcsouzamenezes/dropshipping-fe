@@ -3,6 +3,7 @@ import { useCan } from 'hooks/useCan'
 import {
   RiContactsLine,
   RiDashboardLine,
+  RiFileList2Line,
   RiPlugLine,
   RiPriceTag2Line,
 } from 'react-icons/ri'
@@ -21,6 +22,13 @@ export function SideBarNave() {
         }) && (
           <NavLink icon={RiPriceTag2Line} href="/products">
             Produtos
+          </NavLink>
+        )}
+        {useCan({
+          roles: ['seller'],
+        }) && (
+          <NavLink icon={RiFileList2Line} href="/catalog">
+            Catálogo
           </NavLink>
         )}
         <NavLink icon={RiContactsLine} href="/users">
