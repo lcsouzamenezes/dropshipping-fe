@@ -22,6 +22,7 @@ import { queryClient } from '../../services/queryClient'
 import { useRouter } from 'next/router'
 import { withSSRAuth } from '../../utils/withSSRAuth'
 import { Checkbox } from '@/components/Form/Checkbox'
+import Head from 'next/head'
 
 type CreateUserFormData = {
   name: string
@@ -93,6 +94,14 @@ export default function CreateUser() {
 
   return (
     <Box>
+      <Head>
+        <title>Novo usuário - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Novo usuário - Outter DS"
+          key="title"
+        />
+      </Head>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />

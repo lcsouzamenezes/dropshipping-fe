@@ -24,6 +24,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { Input } from '@/components/Form/Input'
 import { Checkbox } from '@/components/Form/Checkbox'
 import Link from 'next/link'
+import Head from 'next/head'
 
 interface EditUserPageProps {
   user: User
@@ -112,6 +113,14 @@ export default function EditUserPage({ user }: EditUserPageProps) {
 
   return (
     <Template>
+      <Head>
+        <title>Editar usuário - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Editar usuário - Outter DS"
+          key="title"
+        />
+      </Head>
       <Box
         className="panel"
         as="form"

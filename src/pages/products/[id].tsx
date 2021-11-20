@@ -56,6 +56,7 @@ import {
   Integration,
   GetBlingProductsResponse,
 } from './create'
+import Head from 'next/head'
 
 interface EditPageProps {
   product: {
@@ -234,6 +235,14 @@ export default function EditPage({ product, integrations }: EditPageProps) {
 
   return (
     <Layout>
+      <Head>
+        <title>Editar usuário - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Editar usuário - Outter DS"
+          key="title"
+        />
+      </Head>
       <Box
         className="panel"
         as="form"

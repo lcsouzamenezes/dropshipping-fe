@@ -15,6 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useAuth } from '../context/AuthContext'
 import { withSSRGuest } from '../utils/withSSRGuest'
+import Head from 'next/head'
 
 interface SignInFormData {
   email: string
@@ -93,6 +94,10 @@ export default function SignIn() {
       align="center"
       justify="center"
     >
+      <Head>
+        <title>Log in - Outter DS</title>
+        <meta property="og:title" content="Log in - Outter DS" key="title" />
+      </Head>
       <Box mb={8}>
         <ChakraImage
           w={[150, 200]}

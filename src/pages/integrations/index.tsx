@@ -21,12 +21,21 @@ import {
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
+import Head from 'next/head'
 
 export default function Integrations() {
   const { data, error, isFetching, isLoading } = useIngrations()
 
   return (
     <Flex direction="column" h="100vh">
+      <Head>
+        <title>Integrações - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Integrações - Outter DS"
+          key="title"
+        />
+      </Head>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />

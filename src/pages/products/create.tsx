@@ -49,6 +49,7 @@ import { useRouter } from 'next/router'
 import { useMutation } from 'react-query'
 import { queryClient } from '@/services/queryClient'
 import { AxiosError } from 'axios'
+import Head from 'next/head'
 
 export type CreateProductFormData = {
   bling: string
@@ -264,6 +265,14 @@ export default function CreateProductsPage({
 
   return (
     <Layout>
+      <Head>
+        <title>Novo produto - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Novo produto - Outter DS"
+          key="title"
+        />
+      </Head>
       <Box
         className="panel"
         as="form"

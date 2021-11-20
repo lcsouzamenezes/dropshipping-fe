@@ -18,6 +18,7 @@ import meliConfig from '@/config/mercadolivre'
 import { nextApi } from '../../services/api/nextApi'
 import { setupAPIClient } from '@/services/api/api'
 import { AuthorizationResponse } from 'pages/api/mercadolivre/authorize'
+import Head from 'next/head'
 
 interface MercadolivrePageProps {
   success: boolean
@@ -55,6 +56,14 @@ export default function MercadolivrePage({
 
   return (
     <Flex direction="column" h="100vh">
+      <Head>
+        <title>Nova integração - Mercado Livre - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Nova integração - Mercado Livre - Outter DS"
+          key="title"
+        />
+      </Head>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />

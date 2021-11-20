@@ -42,6 +42,7 @@ import { AxiosError } from 'axios'
 import { useMutation } from 'react-query'
 import { queryClient } from '@/services/queryClient'
 import { useAuth } from 'context/AuthContext'
+import Head from 'next/head'
 
 type User = {
   id: string
@@ -143,6 +144,10 @@ export default function UserList() {
 
   return (
     <Template>
+      <Head>
+        <title>Usuários - Outter DS</title>
+        <meta property="og:title" content="Usuários - Outter DS" key="title" />
+      </Head>
       <Box flex="1" className="panel" p="8">
         <Flex mb="4" justify="space-between" align="center">
           <Heading size="lg" fontWeight="normal">

@@ -1,5 +1,6 @@
 import { Flex, SimpleGrid, Box, Text, theme } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
+import Head from 'next/head'
 import { Header } from '../components/Header'
 import { Sidebar } from '../components/Sidebar'
 import { setupAPIClient } from '../services/api/api'
@@ -58,6 +59,10 @@ const series = [
 export default function Dashboard() {
   return (
     <Flex direction="column" h="100vh">
+      <Head>
+        <title>Dashboard - Outter DS</title>
+        <meta property="og:title" content="Dashboard - Outter DS" key="title" />
+      </Head>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />

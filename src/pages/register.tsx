@@ -16,6 +16,7 @@ import { Input } from '../components/Form/Input'
 import { api } from '../services/api/apiClient'
 
 import { withSSRGuest } from '../utils/withSSRGuest'
+import Head from 'next/head'
 
 interface RegisterFormData {
   company: string
@@ -95,6 +96,10 @@ export default function RegisterPage() {
       pt="6"
       pb="6"
     >
+      <Head>
+        <title>Cadastro - Outter DS</title>
+        <meta property="og:title" content="Cadastro - Outter DS" key="title" />
+      </Head>
       <Text
         fontSize={['md', '3xl']}
         fontWeight="bold"

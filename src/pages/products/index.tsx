@@ -40,6 +40,7 @@ import { api } from '@/services/api/apiClient'
 import { Checkbox } from '@/components/Form/Checkbox'
 import { useProducts } from '@/services/api/hooks/useProducts'
 import { queryClient } from '@/services/queryClient'
+import Head from 'next/head'
 
 type User = {
   id: string
@@ -118,6 +119,10 @@ export default function ProductsPage() {
 
   return (
     <Box>
+      <Head>
+        <title>Produtos - Outter DS</title>
+        <meta property="og:title" content="Produtos - Outter DS" key="title" />
+      </Head>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />

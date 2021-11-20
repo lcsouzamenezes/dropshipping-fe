@@ -27,6 +27,7 @@ import { api } from '@/services/api/apiClient'
 import { useRouter } from 'next/router'
 import { useMutation } from 'react-query'
 import { queryClient } from '@/services/queryClient'
+import Head from 'next/head'
 
 interface CreateBlingFormData {
   name: string
@@ -95,6 +96,14 @@ export default function BlingPage() {
 
   return (
     <Flex direction="column" h="100vh">
+      <Head>
+        <title>Nova integração - Bling - Outter DS</title>
+        <meta
+          property="og:title"
+          content="Nova integração - Bling - Outter DS"
+          key="title"
+        />
+      </Head>
       <Header />
       <Flex w="100%" my="6" maxWidth="1480" mx="auto" px="6">
         <Sidebar />
