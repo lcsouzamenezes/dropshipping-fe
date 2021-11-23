@@ -140,9 +140,9 @@ export default function Catalog(props: CatalogProps) {
           </Badge>
         )}
         {product.images.length ? (
-          <SkeletonImage src={product.images[0].url} />
+          <SkeletonImage src={product.images[0].url} maxH="266px" />
         ) : (
-          <Image src="/assets/images/default-placeholder.png" />
+          <Image src="/assets/images/default-placeholder.png" maxH="266px" />
         )}
         <Box p={4}>
           <Box display="flex" alignItems="baseline">
