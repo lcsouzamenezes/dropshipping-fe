@@ -30,7 +30,7 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
           {label}
         </FormLabel>
       )}
-      <InputGroup>
+      <InputGroup size="lg">
         {leftElement && leftElement}
 
         <ChakraInput

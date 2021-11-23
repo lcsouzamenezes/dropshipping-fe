@@ -1,7 +1,7 @@
-import { Stack, HStack, Text, Box } from '@chakra-ui/react'
+import { Stack, HStack, Text, Box, StackProps } from '@chakra-ui/react'
 import { PaginationItem } from './PaginationItem'
 
-interface PaginationProps {
+interface PaginationProps extends StackProps {
   totalCountOfRegisters: number
   registersPerPage?: number
   currentPage?: number
@@ -23,6 +23,7 @@ export function Pagination({
   currentPage = 1,
   registersPerPage = 10,
   onPageChange,
+  ...rest
 }: PaginationProps) {
   const lastPage = Math.ceil(totalCountOfRegisters / registersPerPage)
 
@@ -45,6 +46,7 @@ export function Pagination({
       justify="space-between"
       align="center"
       spacing="6"
+      {...rest}
     >
       <Box>
         <strong>{registersPerPage * (currentPage - 1) + 1}</strong> -{' '}

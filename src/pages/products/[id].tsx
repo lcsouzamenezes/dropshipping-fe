@@ -102,7 +102,7 @@ export default function EditPage({ product, integrations }: EditPageProps) {
         integration_id,
         sku,
         stock,
-        price: parseFloat(price.replace(',', '.')),
+        price: parseFloat(price.replace('.', '').replace(',', '.')),
         ean,
         images,
       }
