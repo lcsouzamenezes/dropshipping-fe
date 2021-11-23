@@ -24,6 +24,7 @@ import {
   FormLabel,
   Stack,
   InputRightElement,
+  AlertIcon,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -105,7 +106,7 @@ export default function Catalog(props: CatalogProps) {
         {
           pathname: router.pathname,
           query: {
-            page,
+            ...((page > 1 || router.query.page) && { page }),
             ...(search && { search }),
             ...(supplier && { supplier }),
           },
@@ -242,7 +243,10 @@ export default function Catalog(props: CatalogProps) {
             </AlertDescription>
           </>
         ) : (
-          <AlertDescription>Nenhum produto encontrado</AlertDescription>
+          <AlertDescription display="flex" flexDirection="row">
+            <AlertIcon />
+            Nenhum dado encontrado.
+          </AlertDescription>
         )}
       </Alert>
     )
