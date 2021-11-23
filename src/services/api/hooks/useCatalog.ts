@@ -17,15 +17,19 @@ interface Product {
     url: string
     is_external: boolean
   }>
+  created_at: Date
+  updated_at: Date
 }
 
-interface ProductFormated {
+export interface ProductFormated {
   id: string
   name: string
   price: string
   stock: number | string
   ean?: string
   sku: string
+  created_at: Date
+  updated_at: Date
   supplier: {
     id: string
     name: string
@@ -37,23 +41,25 @@ interface ProductFormated {
   }>
 }
 
-interface getCatalogResponse {
+interface GetCatalogResponse {
   products: ProductFormated[]
   totalCount: number
 }
 
 const getCatalog = async (
   page: number,
-  perPage: number = 12
-): Promise<getCatalogResponse> => {
+  perPage: number = 12,
+  search: string,
+  supplier: string
+): Promise<GetCatalogResponse> => {
   const { headers, data } = await api.get<Product[]>('catalog', {
     params: {
       page,
       perPage,
+      search,
+      supplier,
     },
   })
-
-  console.log(data)
 
   const totalCount = Number(headers['x-total-count'])
 
@@ -72,6 +78,8 @@ const getCatalog = async (
         id: product.account.id,
         name: product.account.name,
       },
+      created_at: product.created_at,
+      updated_at: product.updated_at,
       images: product.images.map((image) => ({
         id: image.id,
         is_external: image.is_external,
@@ -86,8 +94,17 @@ const getCatalog = async (
   }
 }
 
-export function useCatalog(page: number, perPage?: number) {
-  return useQuery(['catalog', page], async () => getCatalog(page, perPage), {
-    staleTime: 1000 * 60 * 5, //5 minutes
-  })
+export function useCatalog(
+  page: number,
+  perPage?: number,
+  search?: string,
+  supplier?: string
+) {
+  return useQuery(
+    ['catalog', page, search, supplier],
+    async () => getCatalog(page, perPage, search, supplier),
+    {
+      staleTime: 1000 * 60 * 5, //5 minute
+    }
+  )
 }

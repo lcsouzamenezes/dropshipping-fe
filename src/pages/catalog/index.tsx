@@ -1,14 +1,14 @@
+import moment from 'moment'
 import Layout from '@/components/Layout'
 import { Pagination } from '@/components/Pagination'
 import { SkeletonImage } from '@/components/Skeleton/SkeletonImage'
-import { useCatalog } from '@/services/api/hooks/useCatalog'
+import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
 import {
   Box,
   Divider,
   Flex,
   Heading,
   Alert,
-  AlertIcon,
   AlertTitle,
   AlertDescription,
   Button,
@@ -19,11 +19,22 @@ import {
   Spinner,
   Link as ChakraLink,
   Text,
+  Kbd,
+  InputLeftElement,
+  FormLabel,
+  Stack,
+  InputRightElement,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useState } from 'react'
-import { RiExternalLinkLine, RiStarFill } from 'react-icons/ri'
+import { useEffect, useState } from 'react'
+import { RiSearchLine, RiStarFill } from 'react-icons/ri'
+import { Input } from '@/components/Form/Input'
+import { Select } from '@/components/Form/Select'
+import { useSuppliers } from '@/services/api/hooks/useSuppliers'
+import _ from 'lodash'
+import { useRouter } from 'next/router'
+import { withSSRAuth } from 'utils/withSSRAuth'
 
 interface Product {
   id: string
@@ -32,6 +43,8 @@ interface Product {
   stock: number | string
   ean?: string
   sku: string
+  created_at: Date
+  updated_at: Date
   supplier: {
     id: string
     name: string
@@ -43,11 +56,65 @@ interface Product {
   }>
 }
 
-export default function Catalog() {
-  const [page, setPage] = useState(1)
-  const [perPage, SetPerPage] = useState(20)
+interface CatalogProps {
+  query?: {
+    page?: number
+    perPage?: number
+    search?: string
+    supplier?: string
+  }
+}
 
-  const { data, isFetching, isLoading, error } = useCatalog(page, perPage)
+export default function Catalog(props: CatalogProps) {
+  const router = useRouter()
+
+  const [page, setPage] = useState(props.query.page ?? 1)
+  const [hasNoProductsAvailable, setHasNoProductsAvailable] = useState(false)
+  const [perPage, setPerPage] = useState(props.query.perPage ?? 20)
+  const [search, setSearch] = useState<string>(props.query.search)
+  const [supplier, setSupplier] = useState<string>(props.query.supplier)
+  const [products, setProducts] = useState<ProductFormated[]>([])
+
+  const {
+    data: suppliersData,
+    isLoading: isLoadingSuppliers,
+    error: errorSuppliers,
+  } = useSuppliers()
+
+  const { data, isFetching, isLoading, error } = useCatalog(
+    page,
+    perPage,
+    search,
+    supplier
+  )
+
+  useEffect(() => {
+    if (data) {
+      setProducts(data.products)
+      if (
+        data.products.length === 0 &&
+        (page == 1 || !page) &&
+        !search &&
+        !supplier
+      ) {
+        setHasNoProductsAvailable(true)
+      } else {
+        setHasNoProductsAvailable(false)
+      }
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            page,
+            ...(search && { search }),
+            ...(supplier && { supplier }),
+          },
+        },
+        undefined,
+        { shallow: true }
+      )
+    }
+  }, [data])
 
   function renderProduct(product: Product) {
     return (
@@ -59,22 +126,24 @@ export default function Catalog() {
         overflow="hidden"
         position="relative"
       >
-        <Badge
-          position="absolute"
-          right="5"
-          top="5"
-          borderRadius="full"
-          px="2"
-          colorScheme="teal"
-        >
-          Novo
-        </Badge>
+        {moment(product.created_at).diff(moment(), 'days') < 7 && (
+          <Badge
+            position="absolute"
+            right="5"
+            top="5"
+            borderRadius="full"
+            px="2"
+            colorScheme="teal"
+          >
+            Novo
+          </Badge>
+        )}
         {product.images.length ? (
           <SkeletonImage src={product.images[0].url} />
         ) : (
           <Image src="/assets/images/default-placeholder.png" />
         )}
-        <Box p="6">
+        <Box p={4}>
           <Box display="flex" alignItems="baseline">
             <Box
               color="gray.500"
@@ -131,8 +200,51 @@ export default function Catalog() {
               </ChakraLink>
             </Link>
           </Box>
+          <Button w="100%" mt="2" colorScheme="brand">
+            Vender
+          </Button>
         </Box>
       </Box>
+    )
+  }
+
+  function renderNoProductsAlert() {
+    return (
+      <Alert
+        status="info"
+        variant="subtle"
+        alignItems="center"
+        justifyContent="center"
+        textAlign="center"
+        flexDirection="column"
+      >
+        {hasNoProductsAvailable ? (
+          <>
+            <AlertTitle mt={4} mb={1} fontSize="lg">
+              Bem vindo ao Catálogo
+            </AlertTitle>
+            <AlertDescription maxWidth="md">
+              Nenhum produto disponível até o momento. Aguarde até novos
+              fornecedores entrarem em nossa plataforma.
+              {/*Nenhum produto disponível até o momento. Peça autorização para um
+              fornecedor para ter acesso aos seus produtos.
+               <Link href="/suppliers" passHref>
+                <Button
+                  as="a"
+                  leftIcon={<Icon as={RiExternalLinkLine} />}
+                  variant="solid"
+                  colorScheme="blue"
+                  mt={2}
+                >
+                  Fornecedores
+                </Button>
+              </Link> */}
+            </AlertDescription>
+          </>
+        ) : (
+          <AlertDescription>Nenhum produto encontrado</AlertDescription>
+        )}
+      </Alert>
     )
   }
 
@@ -147,11 +259,69 @@ export default function Catalog() {
         />
       </Head>
       <Box className="panel" flex="1" p={['6', '8']}>
-        <Flex mb="8" justify="space-between" align="center">
-          <Heading size="lg" fontWeight="normal">
+        <Stack
+          mb="8"
+          justify="space-between"
+          align="center"
+          direction={['column', 'column', 'column', 'row']}
+        >
+          <Heading size="lg" fontWeight="normal" width="282px">
             Catálogo
+            {isFetching && !isLoading && (
+              <Spinner color="gray.500" size="sm" ml="4" />
+            )}
           </Heading>
-        </Flex>
+          <Box w="100%" pr="6">
+            <Input
+              leftElement={
+                <InputLeftElement
+                  pointerEvents="none"
+                  color="gray.500"
+                  children={<Icon as={RiSearchLine} />}
+                />
+              }
+              name="search"
+              placeholder="Buscar produto"
+              onKeyPress={(e) => {
+                if (e.key == 'Enter') {
+                  const { value } = e.target as HTMLInputElement
+                  setPage(1)
+                  setSearch(value)
+                }
+              }}
+              defaultValue={props.query.search}
+              rightElement={
+                <InputRightElement
+                  pointerEvents="none"
+                  mr="4"
+                  children={<Kbd>ENTER</Kbd>}
+                />
+              }
+            />
+          </Box>
+
+          <Flex align="center">
+            <FormLabel mb="0" htmlFor="supplier" id="supplier-label">
+              Fornecedor:
+            </FormLabel>
+            <Select
+              name="supplier"
+              minWidth="200px"
+              placeholder="Todos"
+              value={supplier}
+              onChange={(e) => setSupplier(e.target.value)}
+              isDisabled={isLoadingSuppliers}
+            >
+              {!errorSuppliers &&
+                !isLoading &&
+                suppliersData.suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </option>
+                ))}
+            </Select>
+          </Flex>
+        </Stack>
         <Divider my="6" borderColor="gray.500" />
         {isLoading ? (
           <Flex justify="center">
@@ -161,40 +331,12 @@ export default function Catalog() {
           <Flex justify="center">
             <Text>Falha ao obter dados.</Text>
           </Flex>
-        ) : !data.products.length ? (
-          <Alert
-            status="info"
-            variant="subtle"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            textAlign="center"
-            height="200px"
-          >
-            <AlertIcon boxSize="40px" mr={0} />
-            <AlertTitle mt={4} mb={1} fontSize="lg">
-              Bem vindo ao Catálogo
-            </AlertTitle>
-            <AlertDescription maxWidth="md">
-              Nenhum produto disponível até o momento. Peça autorização para um
-              fornecedor para ter acesso aos seus produtos.
-              <Link href="/suppliers" passHref>
-                <Button
-                  as="a"
-                  leftIcon={<Icon as={RiExternalLinkLine} />}
-                  variant="solid"
-                  colorScheme="blue"
-                  mt={2}
-                >
-                  Fornecedores
-                </Button>
-              </Link>
-            </AlertDescription>
-          </Alert>
+        ) : !products.length ? (
+          renderNoProductsAlert()
         ) : (
           <>
             <SimpleGrid columns={[1, 2, 3, 4]} spacing={6}>
-              {data.products.map((product) => renderProduct(product))}
+              {products.map((product) => renderProduct(product))}
             </SimpleGrid>
             <Pagination
               registersPerPage={perPage}
@@ -208,3 +350,11 @@ export default function Catalog() {
     </Layout>
   )
 }
+
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  return {
+    props: {
+      query: ctx.query,
+    },
+  }
+})
