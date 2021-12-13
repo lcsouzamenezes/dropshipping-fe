@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import {
   Flex,
   Box,
@@ -16,6 +15,7 @@ import {
   Th,
   Td,
   Spinner,
+  Link as ChakraLink,
 } from '@chakra-ui/react'
 
 import { Header } from '../../components/Header'
@@ -64,7 +64,17 @@ export default function Integrations() {
                     {data.map(({ id, name, type }) => {
                       return (
                         <Tr key={id}>
-                          <Td>{name}</Td>
+                          <Td>
+                            {type === 'Bling' ? (
+                              <Link href={`/integrations/bling/${id}`} passHref>
+                                <ChakraLink color="brand.500">
+                                  <Text fontWeight="bold">{name}</Text>
+                                </ChakraLink>
+                              </Link>
+                            ) : (
+                              <Text fontWeight="bold">{name}</Text>
+                            )}
+                          </Td>
                           <Td>{type}</Td>
                           <Td></Td>
                         </Tr>

@@ -3,9 +3,18 @@ import meliConfig from '@/config/mercadolivre'
 
 interface MeliAccount {
   description?: string
+  user_id: string
   token: string
   refresh_token: string
   expires_at: Date
+}
+
+interface Item {
+  id: string
+  seller_id: string
+  title: string
+  price: number
+  permalink: string
 }
 
 class MercadoLivreAPI {
@@ -49,6 +58,10 @@ class MercadoLivreAPI {
       }
     )
     return client
+  }
+
+  async getItem(id: string) {
+    return await this.client.get<Item>(`items/${id}`)
   }
 }
 

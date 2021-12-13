@@ -26,14 +26,7 @@ import {
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
 import { RiAddLine } from 'react-icons/ri'
-import {
-  FormEvent,
-  FormEventHandler,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { MouseEventHandler, useRef, useState } from 'react'
 import { useUsers } from '../../services/api/hooks/useUsers'
 import Template from '@/components/Layout'
 import { withSSRAuth } from 'utils/withSSRAuth'
@@ -91,12 +84,6 @@ export default function UserList() {
     async (e) => {
       e.preventDefault()
       setIsDeleting(true)
-
-      await new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve()
-        }, 2000)
-      })
 
       try {
         await deleteUser.mutateAsync()

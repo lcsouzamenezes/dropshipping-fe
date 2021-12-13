@@ -201,9 +201,11 @@ export default function Catalog(props: CatalogProps) {
               </ChakraLink>
             </Link>
           </Box>
-          <Button w="100%" mt="2" colorScheme="brand">
-            Vender
-          </Button>
+          <Link href={`/catalog/sell/${product.id}`} passHref>
+            <Button as="a" w="100%" mt="2" colorScheme="brand">
+              Vender
+            </Button>
+          </Link>
         </Box>
       </Box>
     )

@@ -73,6 +73,7 @@ const getCatalog = async (
         style: 'currency',
         currency: 'BRL',
       }),
+
       stock: product.stock < 0 ? (0).toFixed(2) : product.stock,
       supplier: {
         id: product.account.id,
