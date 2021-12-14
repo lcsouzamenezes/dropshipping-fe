@@ -19,9 +19,11 @@ export default async function handler(
     const { data: mercadolivreAccount } = await api.get(
       `integrations/${mercadoLivreId}`
     )
+    console.log(mercadolivreAccount)
     const meliApi = new MercadoLivreAPI(mercadolivreAccount)
     try {
       const { data: getItemData } = await meliApi.getItem(`MLB${id}`)
+      console.log(mercadolivreAccount.user_id, getItemData.seller_id)
       if (getItemData.seller_id != mercadolivreAccount.user_id) {
         return response.status(404).json({
           status: false,

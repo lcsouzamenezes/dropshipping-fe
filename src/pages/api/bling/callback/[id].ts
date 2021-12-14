@@ -1,3 +1,4 @@
+import { api } from '@/services/api/apiClient'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 interface RequestBody {
@@ -6,7 +7,7 @@ interface RequestBody {
 
 interface ParsedData {
   retorno: {
-    estoque: [
+    estoques: [
       {
         estoque: {
           id: string
@@ -24,11 +25,23 @@ export default function handle(
   response: NextApiResponse
 ) {
   if (request.method === 'POST') {
-    const { id } = request.query
+    try {
+      const { id: integration_id } = request.query
 
-    const body = request.body as RequestBody
-    const data = JSON.parse(body.data)
-    console.log()
+      const body = request.body as RequestBody
+      const data = JSON.parse(body.data) as ParsedData
+
+      const estoque = data.retorno.estoques[0].estoque
+
+      api
+        .patch(`callbacks/bling/stock/${integration_id}`, {
+          code: estoque.id,
+          stock: estoque.estoqueAtual,
+        })
+        .catch((err) => {
+          console.log(err.response.data.message)
+        })
+    } catch (error) {}
 
     return response.status(200).end()
   }
