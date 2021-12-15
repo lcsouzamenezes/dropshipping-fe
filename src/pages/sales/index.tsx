@@ -213,8 +213,15 @@ export default function SalesPage() {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  return {
-    props: {},
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    return {
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller'],
   }
-})
+)

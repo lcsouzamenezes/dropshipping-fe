@@ -303,10 +303,15 @@ export default function UserList() {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  return {
-    props: {
-      cookies: ctx.req.headers.cookie ?? '',
-    },
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    return {
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller', 'supplier'],
   }
-})
+)

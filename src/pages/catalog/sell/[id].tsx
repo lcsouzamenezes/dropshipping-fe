@@ -314,15 +314,21 @@ export default function SellItem({ product }: SellItemsProps) {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  const api = setupAPIClient(ctx)
-  const { id } = ctx.params
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const api = setupAPIClient(ctx)
+    const { id } = ctx.params
 
-  const { data: product } = await api.get(`products/${id}`)
+    const { data: product } = await api.get(`products/${id}`)
 
-  return {
-    props: {
-      product,
-    },
+    return {
+      props: {
+        product,
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller'],
   }
-})
+)

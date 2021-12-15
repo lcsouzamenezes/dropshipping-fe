@@ -93,15 +93,21 @@ export default function BlingShowItem({ integration }: BlingShowItemProps) {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  const api = setupAPIClient(ctx)
-  const { id } = ctx.params
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const api = setupAPIClient(ctx)
+    const { id } = ctx.params
 
-  const { data: integration } = await api.get(`integrations/${id}`)
+    const { data: integration } = await api.get(`integrations/${id}`)
 
-  return {
-    props: {
-      integration,
-    },
+    return {
+      props: {
+        integration,
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['supplier'],
   }
-})
+)
