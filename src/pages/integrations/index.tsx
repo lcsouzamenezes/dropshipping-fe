@@ -22,6 +22,7 @@ import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import Head from 'next/head'
+import { withSSRAuth } from 'utils/withSSRAuth'
 
 export default function Integrations() {
   const { data, error, isFetching, isLoading } = useIngrations()
@@ -145,3 +146,16 @@ export default function Integrations() {
     </Flex>
   )
 }
+
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    return {
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller', 'supplier'],
+  }
+)

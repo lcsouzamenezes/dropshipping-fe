@@ -357,10 +357,16 @@ export default function Catalog(props: CatalogProps) {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  return {
-    props: {
-      query: ctx.query,
-    },
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    return {
+      props: {
+        query: ctx.query,
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller'],
   }
-})
+)

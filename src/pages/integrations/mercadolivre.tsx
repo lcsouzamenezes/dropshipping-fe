@@ -94,49 +94,59 @@ export default function MercadolivrePage({
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  const errors = []
-  let success = false
-  const { code } = ctx.query
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const errors = []
+    let success = false
+    const { code } = ctx.query
 
-  if (code) {
-    try {
-      const authorizationResponse = await nextApi.post<AuthorizationResponse>(
-        '/mercadolivre/authorize',
-        {
-          code,
+    if (code) {
+      try {
+        const authorizationResponse = await nextApi.post<AuthorizationResponse>(
+          '/mercadolivre/authorize',
+          {
+            code,
+          }
+        )
+        const {
+          description,
+          access_token,
+          expires_in,
+          user_id,
+          refresh_token,
+        } = authorizationResponse.data
+        const api = setupAPIClient(ctx)
+
+        await api.post('integrations/mercadolivre', {
+          description,
+          access_token,
+          refresh_token,
+          expires_at: expires_in,
+          user_id,
+        })
+
+        success = true
+      } catch (error) {
+        if (error.response.data.error === 'invalid_grant') {
+          errors.push('Codigo inválido ou expirado.')
+        } else if (error.response.data.error === 'invalid_operator_user_id') {
+          errors.push('Usuário Mercado Livre não tem permissão para autorizar.')
+        } else {
+          console.error(error.toJSON())
+          errors.push('Houve uma falha na autenticação.')
         }
-      )
-      const { description, access_token, expires_in, user_id, refresh_token } =
-        authorizationResponse.data
-      const api = setupAPIClient(ctx)
-
-      await api.post('integrations/mercadolivre', {
-        description,
-        access_token,
-        refresh_token,
-        expires_at: expires_in,
-        user_id,
-      })
-
-      success = true
-    } catch (error) {
-      if (error.response.data.error === 'invalid_grant') {
-        errors.push('Codigo inválido ou expirado.')
-      } else if (error.response.data.error === 'invalid_operator_user_id') {
-        errors.push('Usuário Mercado Livre não tem permissão para autorizar.')
-      } else {
-        console.error(error.toJSON())
-        errors.push('Houve uma falha na autenticação.')
       }
     }
-  }
 
-  return {
-    props: {
-      success,
-      errors,
-      cookies: ctx.req.headers.cookie ?? '',
-    },
+    return {
+      props: {
+        success,
+        errors,
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller'],
   }
-})
+)

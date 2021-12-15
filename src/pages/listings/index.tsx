@@ -36,6 +36,7 @@ import { queryClient } from '@/services/queryClient'
 import { useMutation } from 'react-query'
 import Link from 'next/link'
 import { RiFileList2Line } from 'react-icons/ri'
+import { withSSRAuth } from 'utils/withSSRAuth'
 
 type Listing = {
   id: string
@@ -254,3 +255,16 @@ export default function ListingsPage() {
     </Layout>
   )
 }
+
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    return {
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['seller'],
+  }
+)

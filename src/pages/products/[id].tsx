@@ -481,20 +481,26 @@ export default function EditPage({ product, integrations }: EditPageProps) {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  const { id } = ctx.params
-  const api = setupAPIClient(ctx)
-  const { data: product } = await api.get(`products/${id}`)
-  const { data: integrations } = await api.get('integrations', {
-    params: {
-      type: 'bling',
-    },
-  })
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const { id } = ctx.params
+    const api = setupAPIClient(ctx)
+    const { data: product } = await api.get(`products/${id}`)
+    const { data: integrations } = await api.get('integrations', {
+      params: {
+        type: 'bling',
+      },
+    })
 
-  return {
-    props: {
-      product,
-      integrations,
-    },
+    return {
+      props: {
+        product,
+        integrations,
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['supplier'],
   }
-})
+)

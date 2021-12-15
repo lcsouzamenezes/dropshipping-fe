@@ -518,17 +518,23 @@ export default function CreateProductsPage({
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  const api = setupAPIClient(ctx)
-  const { data } = await api.get('integrations', {
-    params: {
-      type: 'bling',
-    },
-  })
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const api = setupAPIClient(ctx)
+    const { data } = await api.get('integrations', {
+      params: {
+        type: 'bling',
+      },
+    })
 
-  return {
-    props: {
-      integrations: data,
-    },
+    return {
+      props: {
+        integrations: data,
+        cookies: ctx.req.headers.cookie ?? '',
+      },
+    }
+  },
+  {
+    roles: ['supplier'],
   }
-})
+)

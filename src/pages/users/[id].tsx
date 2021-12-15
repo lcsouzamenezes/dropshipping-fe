@@ -197,16 +197,21 @@ export default function EditUserPage({ user }: EditUserPageProps) {
   )
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  const api = setupAPIClient(ctx)
-  const { id } = ctx.params
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const api = setupAPIClient(ctx)
+    const { id } = ctx.params
 
-  const { data: user } = await api.get(`users/${id}`)
+    const { data: user } = await api.get(`users/${id}`)
 
-  return {
-    props: {
-      cookies: ctx.req.headers.cookie ?? '',
-      user,
-    },
+    return {
+      props: {
+        cookies: ctx.req.headers.cookie ?? '',
+        user,
+      },
+    }
+  },
+  {
+    roles: ['seller', 'supplier'],
   }
-})
+)
