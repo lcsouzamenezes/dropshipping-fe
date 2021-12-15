@@ -62,6 +62,7 @@ export function setupAPIClient(ctx = undefined) {
                   isRefreshingTheToken = false
                 })
             }
+
             return new Promise((resolve, reject) => {
               failedRequestsQueue.push({
                 resolve: (token: string) => {

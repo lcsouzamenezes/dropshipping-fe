@@ -1,9 +1,11 @@
 import { Stack } from '@chakra-ui/react'
 import { useCan } from 'hooks/useCan'
 import {
+  RiArticleLine,
   RiContactsLine,
   RiDashboardLine,
   RiFileList2Line,
+  RiLineChartLine,
   RiPlugLine,
   RiPriceTag2Line,
 } from 'react-icons/ri'
@@ -27,9 +29,17 @@ export function SideBarNave() {
         {useCan({
           roles: ['seller'],
         }) && (
-          <NavLink icon={RiFileList2Line} href="/catalog">
-            Catálogo
-          </NavLink>
+          <>
+            <NavLink icon={RiLineChartLine} href="/sales">
+              Vendas
+            </NavLink>
+            <NavLink icon={RiFileList2Line} href="/catalog">
+              Catálogo
+            </NavLink>
+            <NavLink icon={RiArticleLine} href="/listings">
+              Anúncios
+            </NavLink>
+          </>
         )}
         <NavLink icon={RiContactsLine} href="/users">
           Usuários

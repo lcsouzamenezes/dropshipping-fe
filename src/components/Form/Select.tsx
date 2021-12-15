@@ -6,11 +6,12 @@ import {
   SelectProps as ChakraSelectProps,
 } from '@chakra-ui/react'
 import { forwardRef, ForwardRefRenderFunction } from 'react'
+import { FieldError } from 'react-hook-form'
 
 interface SelectProps extends ChakraSelectProps {
   name: string
   label?: string
-  error?: string
+  error?: FieldError
 }
 
 const SelectBase: ForwardRefRenderFunction<HTMLSelectElement, SelectProps> = (
@@ -36,7 +37,7 @@ const SelectBase: ForwardRefRenderFunction<HTMLSelectElement, SelectProps> = (
       >
         {children}
       </ChakraSelect>
-      {!!error && <FormErrorMessage>Error vai aqui</FormErrorMessage>}
+      {!!error && <FormErrorMessage>{error.message}</FormErrorMessage>}
     </FormControl>
   )
 }

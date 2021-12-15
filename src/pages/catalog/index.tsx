@@ -140,9 +140,9 @@ export default function Catalog(props: CatalogProps) {
           </Badge>
         )}
         {product.images.length ? (
-          <SkeletonImage src={product.images[0].url} />
+          <SkeletonImage src={product.images[0].url} maxH="266px" />
         ) : (
-          <Image src="/assets/images/default-placeholder.png" />
+          <Image src="/assets/images/default-placeholder.png" maxH="266px" />
         )}
         <Box p={4}>
           <Box display="flex" alignItems="baseline">
@@ -201,9 +201,11 @@ export default function Catalog(props: CatalogProps) {
               </ChakraLink>
             </Link>
           </Box>
-          <Button w="100%" mt="2" colorScheme="brand">
-            Vender
-          </Button>
+          <Link href={`/catalog/sell/${product.id}`} passHref>
+            <Button as="a" w="100%" mt="2" colorScheme="brand">
+              Vender
+            </Button>
+          </Link>
         </Box>
       </Box>
     )
