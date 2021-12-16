@@ -77,7 +77,9 @@ export default function MercadolivrePage({
             <Alert mb="6" status="info" borderRadius="md" variant="left-accent">
               <AlertIcon />
               Certifique-se de estar autenticado na conta que deseja adicionar
-              antes de clicar em Adicionar.
+              antes de clicar em Adicionar. {
+                process.env.NEXT_PUBLIC_HOST
+              } - {process.env.NEXT_PUBLIC_ML_APP_ID}
             </Alert>
             <Link
               href={`${meliConfig.authURL}&client_id=${process.env.NEXT_PUBLIC_ML_APP_ID}&redirect_uri=${process.env.NEXT_PUBLIC_HOST}/integrations/mercadolivre`}
