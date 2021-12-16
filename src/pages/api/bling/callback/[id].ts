@@ -20,7 +20,7 @@ interface ParsedData {
   }
 }
 
-export default function handle(
+export default async function handle(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
@@ -33,7 +33,7 @@ export default function handle(
 
       const estoque = data.retorno.estoques[0].estoque
 
-      api
+      await api
         .patch(`callbacks/bling/stock/${integration_id}`, {
           code: estoque.id,
           stock: estoque.estoqueAtual,
