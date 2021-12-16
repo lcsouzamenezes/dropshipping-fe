@@ -151,7 +151,7 @@ export default function BlingPage() {
           </VStack>
           <Flex mt="8" justify="flex-end">
             <HStack spacing="4">
-              <Link href="/users" passHref>
+              <Link href="/integrations" passHref>
                 <Button as="a">Cancelar</Button>
               </Link>
               <Button
