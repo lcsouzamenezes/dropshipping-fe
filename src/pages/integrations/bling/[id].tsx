@@ -64,7 +64,7 @@ export default function BlingShowItem({ integration }: BlingShowItemProps) {
               label="URL de Callback de estoque"
               name="stock_callback_url"
               type="text"
-              value={`${process.env.NEXT_PUBLIC_HOST}/api/bling/${integration.id}`}
+              value={`${process.env.NEXT_PUBLIC_HOST}/api/bling/callback/${integration.id}`}
               ref={callbackUrlInput}
               rightElement={
                 <InputRightElement>
