@@ -23,6 +23,7 @@ import { Sidebar } from '../../components/Sidebar'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import Head from 'next/head'
 import { withSSRAuth } from 'utils/withSSRAuth'
+import { useCan } from 'hooks/useCan'
 
 export default function Integrations() {
   const { data, error, isFetching, isLoading } = useIngrations()
@@ -91,54 +92,66 @@ export default function Integrations() {
               Adicionar Integrações
             </Heading>
             <Grid templateColumns="repeat(5, 1fr)" gap={6} align="center">
-              <Box bgColor="white" p="4" borderWidth="1px" borderRadius="lg">
-                <Flex
-                  p="6"
-                  mb="6"
-                  borderRadius="sm"
-                  h="120px"
-                  align="center"
-                  justify="center"
-                >
-                  <Image src="/assets/images/services/bling.svg" alt="Bling" />
-                </Flex>
-                <Box>
-                  <Text color="gray.800" fontSize="lg" fontWeight="bold">
-                    Bling
-                  </Text>
-                  <Link href="/integrations/bling" passHref>
-                    <Button as="a" mt="4" colorScheme="brand">
-                      Adicionar
-                    </Button>
-                  </Link>
+              {useCan({
+                roles: ['supplier'],
+              }) && (
+                <Box bgColor="white" p="4" borderWidth="1px" borderRadius="lg">
+                  <Flex
+                    p="6"
+                    mb="6"
+                    borderRadius="sm"
+                    h="120px"
+                    align="center"
+                    justify="center"
+                  >
+                    <Image
+                      src="/assets/images/services/bling.svg"
+                      alt="Bling"
+                    />
+                  </Flex>
+                  <Box>
+                    <Text color="gray.800" fontSize="lg" fontWeight="bold">
+                      Bling
+                    </Text>
+                    <Link href="/integrations/bling" passHref>
+                      <Button as="a" mt="4" colorScheme="brand">
+                        Adicionar
+                      </Button>
+                    </Link>
+                  </Box>
                 </Box>
-              </Box>
-              <Box bgColor="white" p="4" borderWidth="1px" borderRadius="lg">
-                <Flex
-                  bgColor="white"
-                  p="6"
-                  mb="6"
-                  borderRadius="sm"
-                  h="120px"
-                  align="center"
-                  justify="center"
-                >
-                  <Image
-                    src="/assets/images/services/mercadolivre.svg"
-                    alt="MercadoLivre"
-                  />
-                </Flex>
-                <Box>
-                  <Text color="gray.800" fontSize="lg" fontWeight="bold">
-                    Mercado Livre
-                  </Text>
-                  <Link href="/integrations/mercadolivre" passHref>
-                    <Button as="a" mt="4" colorScheme="brand">
-                      Adicionar
-                    </Button>
-                  </Link>
+              )}
+              {useCan({
+                roles: ['seller'],
+              }) && (
+                <Box bgColor="white" p="4" borderWidth="1px" borderRadius="lg">
+                  <Flex
+                    bgColor="white"
+                    p="6"
+                    mb="6"
+                    borderRadius="sm"
+                    h="120px"
+                    align="center"
+                    justify="center"
+                  >
+                    <Image
+                      src="/assets/images/services/mercadolivre.svg"
+                      alt="MercadoLivre"
+                    />
+                  </Flex>
+
+                  <Box>
+                    <Text color="gray.800" fontSize="lg" fontWeight="bold">
+                      Mercado Livre
+                    </Text>
+                    <Link href="/integrations/mercadolivre" passHref>
+                      <Button as="a" mt="4" colorScheme="brand">
+                        Adicionar
+                      </Button>
+                    </Link>
+                  </Box>
                 </Box>
-              </Box>
+              )}
             </Grid>
           </Box>
         </Box>
