@@ -19,7 +19,7 @@ export function setupAPIClient(ctx = undefined) {
   api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         if (error.response.data?.code === 'token.expired') {
           cookies = parseCookies(ctx)
 
