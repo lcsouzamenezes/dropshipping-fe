@@ -46,11 +46,7 @@ export function Profile({ showProfileDetails = true }: ProfileProps) {
               </Text>
             </Box>
           )}
-          <Avatar
-            size="md"
-            name={user.name}
-            src={`https://avatars.dicebear.com/api/identicon/${user.name}.svg`}
-          />
+          <Avatar size="md" name={user.name} src={``} />
         </Flex>
       </MenuButton>
       <MenuList>
