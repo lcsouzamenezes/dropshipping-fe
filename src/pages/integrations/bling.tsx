@@ -90,6 +90,12 @@ export default function BlingPage() {
           message: 'Api Key inválida, verifique e tente novamente.',
           type: 'manual',
         })
+      } else if (err.response?.status === 403) {
+        setError('apiKey', {
+          message:
+            'API Key sem permissões, por favor verifique e tente novamente',
+          type: 'manual',
+        })
       }
     }
   }
