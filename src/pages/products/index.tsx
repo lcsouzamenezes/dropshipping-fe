@@ -26,13 +26,16 @@ import {
   useToast,
   Alert,
   AlertIcon,
+  InputLeftElement,
+  InputRightElement,
+  Kbd,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
-import { RiAddLine, RiDownloadLine } from 'react-icons/ri'
-import { useState } from 'react'
+import { RiAddLine, RiDownloadLine, RiSearchLine } from 'react-icons/ri'
+import { useEffect, useState } from 'react'
 import { Select } from '@/components/Form/Select'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
@@ -41,6 +44,9 @@ import { Checkbox } from '@/components/Form/Checkbox'
 import { useProducts } from '@/services/api/hooks/useProducts'
 import { queryClient } from '@/services/queryClient'
 import Head from 'next/head'
+import { Input } from '@/components/Form/Input'
+import { useRouter } from 'next/router'
+import { ProductFormated } from '@/services/api/hooks/useProducts'
 
 type User = {
   id: string
@@ -58,18 +64,57 @@ interface BlingProductImportResponse {
   message: string
 }
 
-export default function ProductsPage() {
+interface ProductsPageProps {
+  query?: {
+    page?: number
+    perPage?: number
+    search?: string
+  }
+}
+
+export default function ProductsPage(props: ProductsPageProps) {
+  const router = useRouter()
+
   const [page, setPage] = useState(1)
   const [perPage, SetPerPage] = useState(20)
   const [selectedBling, setSelectedBling] = useState<string>(undefined)
   const [updateProductsBling, setUpdateProductsBling] = useState(true)
+  const [hasNoProductsAvailable, setHasNoProductsAvailable] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
+  const [search, setSearch] = useState<string>(props.query.search)
+  const [products, setProducts] = useState<ProductFormated[]>([])
 
   const integrationsQuery = useIngrations('bling')
-  const { isFetching, isLoading, error, data } = useProducts(page, perPage)
+  const { isFetching, isLoading, error, data } = useProducts(
+    page,
+    perPage,
+    search
+  )
 
   const isWideVersion = useBreakpointValue({ base: false, lg: true })
+
+  useEffect(() => {
+    if (data) {
+      setProducts(data.products)
+      if (data.products.length === 0 && (page == 1 || !page) && !search) {
+        setHasNoProductsAvailable(true)
+      } else {
+        setHasNoProductsAvailable(false)
+      }
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...((page > 1 || router.query.page) && { page }),
+            ...(search && { search }),
+          },
+        },
+        undefined,
+        { shallow: true }
+      )
+    }
+  }, [data])
 
   async function handlePrefetchProduct(product_id: string) {
     await queryClient.prefetchQuery(
@@ -128,12 +173,40 @@ export default function ProductsPage() {
         <Sidebar />
         <Box flex="1" className="panel" p="8">
           <Flex mb="8" justify="space-between" align="center">
-            <Heading size="lg" fontWeight="normal">
+            <Heading size="lg" fontWeight="normal" width="260px">
               Produtos
               {isFetching && !isLoading && (
                 <Spinner color="gray.500" size="sm" ml="4" />
               )}
             </Heading>
+            <Box w="100%" pr="6">
+              <Input
+                leftElement={
+                  <InputLeftElement
+                    pointerEvents="none"
+                    color="gray.500"
+                    children={<Icon as={RiSearchLine} />}
+                  />
+                }
+                name="search"
+                placeholder="Buscar produto"
+                onKeyPress={(e) => {
+                  if (e.key == 'Enter') {
+                    const { value } = e.target as HTMLInputElement
+                    setPage(1)
+                    setSearch(value)
+                  }
+                }}
+                defaultValue={props.query.search}
+                rightElement={
+                  <InputRightElement
+                    pointerEvents="none"
+                    mr="4"
+                    children={<Kbd>ENTER</Kbd>}
+                  />
+                }
+              />
+            </Box>
             <Stack direction="row">
               <Button
                 onClick={onOpen}
@@ -182,7 +255,7 @@ export default function ProductsPage() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data.products.map((product) => (
+                  {products.map((product) => (
                     <Tr key={product.id}>
                       <Td px={['4', '4', '6']}>
                         <Checkbox colorScheme="brand" />
@@ -210,7 +283,7 @@ export default function ProductsPage() {
                   ))}
                 </Tbody>
               </Table>
-              {!data.products.length && (
+              {!products.length && (
                 <Box p={2}>
                   <Alert status="info" display="flex" justifyContent="center">
                     <AlertIcon />
@@ -280,6 +353,7 @@ export const getServerSideProps = withSSRAuth(
   async (ctx) => {
     return {
       props: {
+        query: ctx.query,
         cookies: ctx.req.headers.cookie ?? '',
       },
     }

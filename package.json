@@ -34,6 +34,7 @@
     "react-text-mask": "^5.4.3",
     "sharp": "^0.29.3",
     "socket.io-client": "^4.3.2",
+    "xss": "^1.0.10",
     "yup": "^0.32.9"
   },
   "devDependencies": {

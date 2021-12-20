@@ -10,7 +10,7 @@ interface Product {
   stock: number
 }
 
-interface ProductFormated {
+export interface ProductFormated {
   id: string
   name: string
   price: string
@@ -26,12 +26,14 @@ interface GetProductsResponse {
 
 async function getProducts(
   page: number,
-  perPage: number = 12
+  perPage: number = 12,
+  search?: string
 ): Promise<GetProductsResponse> {
   const { headers, data } = await api.get<Product[]>('products', {
     params: {
       page,
       perPage,
+      search,
     },
   })
 
@@ -57,8 +59,12 @@ async function getProducts(
   }
 }
 
-export function useProducts(page: number, perPage?: number) {
-  return useQuery(['products', page], async () => getProducts(page, perPage), {
-    staleTime: 1000 * 60 * 5, //5 minutes
-  })
+export function useProducts(page: number, perPage?: number, search?: string) {
+  return useQuery(
+    ['products', page, perPage, search],
+    async () => getProducts(page, perPage, search),
+    {
+      staleTime: 1000 * 60 * 5, //5 minutes
+    }
+  )
 }
