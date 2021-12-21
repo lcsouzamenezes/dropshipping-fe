@@ -2,6 +2,7 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
+  Text,
   Select as ChakraSelect,
   SelectProps as ChakraSelectProps,
 } from '@chakra-ui/react'
@@ -12,10 +13,11 @@ interface SelectProps extends ChakraSelectProps {
   name: string
   label?: string
   error?: FieldError
+  showRequiredLabel?: boolean
 }
 
 const SelectBase: ForwardRefRenderFunction<HTMLSelectElement, SelectProps> = (
-  { label, name, error = null, children, ...rest },
+  { label, name, error = null, children, showRequiredLabel = false, ...rest },
   ref
 ) => {
   return (
@@ -23,6 +25,11 @@ const SelectBase: ForwardRefRenderFunction<HTMLSelectElement, SelectProps> = (
       {!!label && (
         <FormLabel htmlFor={name} id={`${name}-label`}>
           {label}
+          {showRequiredLabel && (
+            <Text as="span" color="red" ml="0.5">
+              *
+            </Text>
+          )}
         </FormLabel>
       )}
       <ChakraSelect
