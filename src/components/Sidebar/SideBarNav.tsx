@@ -17,7 +17,7 @@ export function SideBarNave() {
     <Stack spacing="12" align="flex-start">
       <NavSection title="Geral">
         <NavLink icon={RiDashboardLine} href="/dashboard">
-          Dashboard
+          Painel
         </NavLink>
         {useCan({
           roles: ['supplier'],
