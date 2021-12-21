@@ -3,9 +3,12 @@ import {
   FormLabel,
   FormErrorMessage,
   InputGroup,
+  Text,
   Input as ChakraInput,
   InputProps as ChakraInputProps,
 } from '@chakra-ui/react'
+
+import MaskedInput from 'react-input-mask'
 
 import { FieldError } from 'react-hook-form'
 
@@ -17,10 +20,23 @@ interface InputProps extends ChakraInputProps {
   error?: FieldError
   leftElement?: ReactElement
   rightElement?: ReactElement
+  showRequiredLabel?: boolean
+  mask?: string | Array<string | RegExp>
+  maskPlaceholder?: null | string
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
-  { name, label, error = null, leftElement, rightElement, ...rest },
+  {
+    name,
+    label,
+    error = null,
+    leftElement,
+    rightElement,
+    showRequiredLabel = false,
+    mask,
+    maskPlaceholder = null,
+    ...rest
+  },
   ref
 ) => {
   return (
@@ -28,12 +44,18 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
       {!!label && (
         <FormLabel htmlFor={name} id={`${name}-label`}>
           {label}
+          {showRequiredLabel && (
+            <Text as="span" color="red" ml="0.5">
+              *
+            </Text>
+          )}
         </FormLabel>
       )}
       <InputGroup size="lg">
         {leftElement && leftElement}
 
         <ChakraInput
+          as={mask && MaskedInput}
           ref={ref}
           id={name}
           name={name}
@@ -41,6 +63,8 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
           focusBorderColor="brand.400"
           variant="filled"
           size="lg"
+          mask={mask}
+          {...(mask && { maskPlaceholder })}
           {...rest}
         />
         {rightElement && rightElement}

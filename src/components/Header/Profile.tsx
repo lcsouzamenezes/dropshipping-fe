@@ -11,8 +11,14 @@ import {
   Badge,
 } from '@chakra-ui/react'
 import { useAuth } from '../../context/AuthContext'
-import { RiLogoutBoxLine, RiVipCrownFill, RiVipCrownLine } from 'react-icons/ri'
+import {
+  RiLogoutBoxLine,
+  RiProfileLine,
+  RiVipCrownFill,
+  RiVipCrownLine,
+} from 'react-icons/ri'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
 const Menu = dynamic(
   import('@chakra-ui/react').then((chakra) => chakra.Menu),
   { ssr: false }
@@ -23,6 +29,7 @@ interface ProfileProps {
 }
 
 export function Profile({ showProfileDetails = true }: ProfileProps) {
+  const router = useRouter()
   const { user, signOut } = useAuth()
 
   if (!user) {
@@ -50,6 +57,12 @@ export function Profile({ showProfileDetails = true }: ProfileProps) {
         </Flex>
       </MenuButton>
       <MenuList>
+        <MenuItem
+          onClick={() => router.push('/profile')}
+          icon={<Icon as={RiProfileLine} fontSize="18" color="brand.500" />}
+        >
+          Profile
+        </MenuItem>
         <MenuItem
           onClick={signOut}
           icon={<Icon as={RiLogoutBoxLine} fontSize="18" color="brand.500" />}
