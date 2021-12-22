@@ -40,6 +40,9 @@ export function SideBarNave() {
             <NavLink icon={RiArticleLine} href="/listings">
               Anúncios
             </NavLink>
+            <NavLink icon={RiBuildingLine} href="/suppliers">
+              Fornecedores
+            </NavLink>
           </>
         )}
         <NavLink icon={RiContactsLine} href="/users">
