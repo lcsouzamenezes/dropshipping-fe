@@ -25,6 +25,7 @@ import {
   Badge,
   useToast,
   Icon,
+  Stack,
 } from '@chakra-ui/react'
 
 import Layout from '@/components/Layout'
@@ -35,8 +36,9 @@ import { api } from '@/services/api/apiClient'
 import { queryClient } from '@/services/queryClient'
 import { useMutation } from 'react-query'
 import Link from 'next/link'
-import { RiFileList2Line } from 'react-icons/ri'
+import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
+import Head from 'next/head'
 
 type Listing = {
   id: string
@@ -105,6 +107,10 @@ export default function ListingsPage() {
 
   return (
     <Layout>
+      <Head>
+        <title>Anúncios - Outter DS</title>
+        <meta property="og:title" content="Anúncios - Outter DS" key="title" />
+      </Head>
       <Box flex="1" className="panel" p="8">
         <Flex mb="8" justify="space-between" align="center">
           <Heading size="lg" fontWeight="normal">
@@ -113,17 +119,14 @@ export default function ListingsPage() {
               <Spinner color="gray.500" size="sm" ml="4" />
             )}
           </Heading>
-          <Link href="/catalog" passHref>
-            <Button
-              as="a"
-              size="sm"
-              fontSize="sm"
-              leftIcon={<Icon as={RiFileList2Line} fontSize={20} />}
-              colorScheme="brand"
-            >
-              Ver Catalogo
-            </Button>
-          </Link>
+          <Stack direction="row">
+            <Link href="/catalog" passHref>
+              <Button as="a" size="sm" fontSize="sm" colorScheme="brand">
+                <Icon as={RiFileList2Line} fontSize={20} mr="1" />
+                Ver Catalogo
+              </Button>
+            </Link>
+          </Stack>
         </Flex>
         {isLoading ? (
           <Flex justify="center">

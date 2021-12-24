@@ -5,7 +5,6 @@ import {
   Box,
   Flex,
   Heading,
-  Divider,
   VStack,
   SimpleGrid,
   HStack,
@@ -285,7 +284,6 @@ export default function CreateProductsPage({
             Cadastro de Produto
           </Heading>
         </Flex>
-        <Divider my="6" borderColor="gray.500" />
         <VStack spacing="8">
           <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
             <Controller

@@ -6,7 +6,6 @@ import {
   Heading,
   Button,
   SimpleGrid,
-  Divider,
   VStack,
   HStack,
   Alert,
@@ -125,7 +124,6 @@ export default function BlingPage() {
               Nova Conta Bling
             </Heading>
           </Flex>
-          <Divider my="6" borderColor="gray.500" />
           <VStack spacing="8">
             <Alert status="info" borderRadius="md" variant="left-accent">
               <AlertIcon />

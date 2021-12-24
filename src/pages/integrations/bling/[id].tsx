@@ -3,7 +3,6 @@ import { setupAPIClient } from '@/services/api/api'
 
 import {
   Box,
-  Divider,
   Flex,
   Heading,
   SimpleGrid,
@@ -57,7 +56,6 @@ export default function BlingShowItem({ integration }: BlingShowItemProps) {
             Bling - {integration.description}
           </Heading>
         </Flex>
-        <Divider my="6" borderColor="gray.500" />
         <VStack spacing="8">
           <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
             <Input

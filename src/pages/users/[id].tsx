@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Heading,
   HStack,
@@ -136,7 +135,6 @@ export default function EditUserPage({ user }: EditUserPageProps) {
             </Text>
           </Heading>
         </Flex>
-        <Divider my="6" borderColor="gray.500" />
         <VStack spacing="8">
           <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
             <Input

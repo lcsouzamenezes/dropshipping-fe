@@ -1,19 +1,27 @@
-import { Skeleton, Image, ImageProps } from '@chakra-ui/react'
+import {
+  Skeleton,
+  Image,
+  ImageProps,
+  SkeletonProps,
+  ComponentWithAs,
+} from '@chakra-ui/react'
 import { useState } from 'react'
 
 interface SkeletonImageProps extends ImageProps {
   src: string
+  wrapperProps?: SkeletonProps
 }
 
 export function SkeletonImage({
   onLoad,
   onError,
+  wrapperProps,
   ...rest
 }: SkeletonImageProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   return (
-    <Skeleton isLoaded={!isLoading}>
+    <Skeleton isLoaded={!isLoading} {...wrapperProps}>
       <Image
         onLoad={(e) => {
           setIsLoading(false)

@@ -29,12 +29,19 @@ import {
   InputLeftElement,
   InputRightElement,
   Kbd,
+  Tooltip,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
 import { Header } from '../../components/Header'
 import { Sidebar } from '../../components/Sidebar'
-import { RiAddLine, RiDownloadLine, RiSearchLine } from 'react-icons/ri'
+import {
+  RiAddLine,
+  RiCheckboxCircleLine,
+  RiCloseCircleLine,
+  RiDownloadLine,
+  RiSearchLine,
+} from 'react-icons/ri'
 import { useEffect, useState } from 'react'
 import { Select } from '@/components/Form/Select'
 import { withSSRAuth } from 'utils/withSSRAuth'
@@ -47,6 +54,7 @@ import Head from 'next/head'
 import { Input } from '@/components/Form/Input'
 import { useRouter } from 'next/router'
 import { ProductFormated } from '@/services/api/hooks/useProducts'
+import { useMutation } from 'react-query'
 
 type User = {
   id: string
@@ -162,6 +170,43 @@ export default function ProductsPage(props: ProductsPageProps) {
     onClose()
   }
 
+  const activeInactive = useMutation(
+    async (productId: string) => {
+      const { data: product } = await api.get(`products/${productId}`)
+      const response = await api.put(`products/${product.id}`, {
+        ...product,
+        active: !product.active,
+      })
+      return response.data
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('products')
+      },
+    }
+  )
+
+  async function handleProductActiveInactive(productId: string) {
+    try {
+      const updatedProduct = await activeInactive.mutateAsync(productId)
+      toast({
+        status: 'success',
+        variant: 'solid',
+        position: 'top',
+        title: `Produto ${
+          updatedProduct.active ? 'ativo' : 'inativo'
+        } com sucesso`,
+      })
+    } catch (error) {
+      toast({
+        status: 'error',
+        variant: 'solid',
+        position: 'top',
+        title: 'Falha ao atualizar status do produto',
+      })
+    }
+  }
+
   return (
     <Box>
       <Head>
@@ -249,6 +294,7 @@ export default function ProductsPage(props: ProductsPageProps) {
                       <Checkbox colorScheme="brand" />
                     </Th>
                     <Th>Produto</Th>
+                    <Th>Ativo</Th>
                     <Th>Preço</Th>
                     {isWideVersion && <Th>Estoque</Th>}
                     <Th width={['6', '6', '8']}></Th>
@@ -277,8 +323,38 @@ export default function ProductsPage(props: ProductsPageProps) {
                           </Text>
                         </Box>
                       </Td>
+                      <Td>
+                        {product.active ? (
+                          <Tooltip label="Desativar" placement="top">
+                            <Button
+                              variant="ghost"
+                              colorScheme="green"
+                              size="sm"
+                              onClick={() =>
+                                handleProductActiveInactive(product.id)
+                              }
+                            >
+                              <Icon as={RiCheckboxCircleLine} fontSize="xl" />
+                            </Button>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip label="Ativar" placement="top">
+                            <Button
+                              variant="ghost"
+                              colorScheme="red"
+                              size="sm"
+                              onClick={() =>
+                                handleProductActiveInactive(product.id)
+                              }
+                            >
+                              <Icon as={RiCloseCircleLine} fontSize="xl" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </Td>
                       <Td>{product.price}</Td>
                       {isWideVersion && <Td>{product.stock}</Td>}
+                      <Td></Td>
                     </Tr>
                   ))}
                 </Tbody>
