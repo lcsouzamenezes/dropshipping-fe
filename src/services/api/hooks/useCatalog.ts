@@ -41,7 +41,7 @@ export interface ProductFormated {
   }>
 }
 
-interface GetCatalogResponse {
+export interface GetCatalogResponse {
   products: ProductFormated[]
   totalCount: number
 }
@@ -102,7 +102,7 @@ export function useCatalog(
   supplier?: string
 ) {
   return useQuery(
-    ['catalog', page, search, supplier],
+    ['catalog', page, perPage, search, supplier],
     async () => getCatalog(page, perPage, search, supplier),
     {
       staleTime: 1000 * 60 * 5, //5 minute

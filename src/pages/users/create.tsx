@@ -2,7 +2,6 @@ import {
   Box,
   Heading,
   Button,
-  Divider,
   VStack,
   HStack,
   SimpleGrid,
@@ -117,7 +116,6 @@ export default function CreateUser() {
               Criação de Usuário
             </Heading>
           </Flex>
-          <Divider my="6" borderColor="gray.500" />
           <VStack spacing="8">
             <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
               <Input

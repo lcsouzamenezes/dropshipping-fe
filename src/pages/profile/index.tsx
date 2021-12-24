@@ -5,7 +5,6 @@ import { setupAPIClient } from '@/services/api/api'
 import { api } from '@/services/api/apiClient'
 import {
   Box,
-  Divider,
   Flex,
   Heading,
   SimpleGrid,
@@ -428,8 +427,6 @@ export default function ProfilePage() {
             )}
           </Heading>
         </Flex>
-        <Divider my="6" borderColor="gray.500" />
-
         <VStack spacing="8">
           <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
             <Input

@@ -7,7 +7,6 @@ import Head from 'next/head'
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Heading,
   Icon,
@@ -126,14 +125,13 @@ export default function DetailedProductPage({
                 Voltar
               </Button>
             </Link>
-            <Link href="/catalog" passHref>
+            <Link href={`/catalog/sell/${product.id}`} passHref>
               <Button as="a" ml="2" colorScheme="brand">
                 Vender
               </Button>
             </Link>
           </Box>
         </Stack>
-        <Divider my="6" borderColor="gray.500" />
         <Flex justify="space-between" alignItems="center">
           <Stack direction="row">
             <Flex alignItems="center">

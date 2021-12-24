@@ -8,6 +8,7 @@ interface Product {
   name: string
   price: number
   stock: number
+  active: boolean
 }
 
 export interface ProductFormated {
@@ -17,6 +18,7 @@ export interface ProductFormated {
   stock: number | string
   ean?: string
   sku: string
+  active: boolean
 }
 
 interface GetProductsResponse {
@@ -50,6 +52,7 @@ async function getProducts(
         currency: 'BRL',
       }),
       stock: product.stock < 0 ? (0).toFixed(2) : product.stock,
+      active: product.active,
     }
   })
 

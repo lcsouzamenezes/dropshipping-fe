@@ -5,7 +5,6 @@ import { SkeletonImage } from '@/components/Skeleton/SkeletonImage'
 import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
 import {
   Box,
-  Divider,
   Flex,
   Heading,
   Alert,
@@ -119,13 +118,14 @@ export default function Catalog(props: CatalogProps) {
 
   function renderProduct(product: Product) {
     return (
-      <Box
+      <Flex
         key={product.id}
         maxW="sm"
         borderWidth="1px"
         borderRadius="lg"
         overflow="hidden"
         position="relative"
+        direction="column"
       >
         {moment(product.created_at).diff(moment(), 'days') < 7 && (
           <Badge
@@ -139,12 +139,27 @@ export default function Catalog(props: CatalogProps) {
             Novo
           </Badge>
         )}
-        {product.images.length ? (
-          <SkeletonImage src={product.images[0].url} maxH="266px" />
-        ) : (
-          <Image src="/assets/images/default-placeholder.png" maxH="266px" />
-        )}
-        <Box p={4}>
+        <Flex w="100%" pb="100%" position="relative" bgColor="white">
+          {product.images.length ? (
+            <SkeletonImage
+              src={product.images[0].url}
+              position="absolute"
+              width="100%"
+              height="100%"
+              objectFit="contain"
+            />
+          ) : (
+            <Image
+              src="/assets/images/default-placeholder.png"
+              position="absolute"
+              width="100%"
+              height="100%"
+              objectFit="cover"
+            />
+          )}
+        </Flex>
+
+        <Flex p={4} direction="column" height="100%">
           <Box display="flex" alignItems="baseline">
             <Box
               color="gray.500"
@@ -161,7 +176,7 @@ export default function Catalog(props: CatalogProps) {
             fontWeight="semibold"
             as="h4"
             lineHeight="tight"
-            isTruncated
+            // isTruncated
             title={product.name}
           >
             {product.name}
@@ -186,7 +201,7 @@ export default function Catalog(props: CatalogProps) {
               {0} reviews
             </Box>
           </Box>
-          <Box mt="1" as="h5" isTruncated lineHeight="tight">
+          <Box mt="1" as="h5" isTruncated lineHeight="tight" mb="2">
             <Box as="span" fontSize="sm" color="gray.500">
               Por:
             </Box>
@@ -202,12 +217,12 @@ export default function Catalog(props: CatalogProps) {
             </Link>
           </Box>
           <Link href={`/catalog/product/${product.id}`} passHref>
-            <Button as="a" w="100%" mt="2" colorScheme="brand">
+            <Button as="a" w="100%" mt="auto" colorScheme="brand">
               Mais detalhes
             </Button>
           </Link>
-        </Box>
-      </Box>
+        </Flex>
+      </Flex>
     )
   }
 
@@ -328,7 +343,6 @@ export default function Catalog(props: CatalogProps) {
             </Select>
           </Flex>
         </Stack>
-        <Divider my="6" borderColor="gray.500" />
         {isLoading ? (
           <Flex justify="center">
             <Spinner color="brand.500" />

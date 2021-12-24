@@ -34,7 +34,6 @@ export function withSSRAuth<P>(
 
     if (options) {
       const api = setupAPIClient(ctx)
-
       const userPermissions = await queryClient.fetchQuery<{
         permissions: string[]
         roles: string[]
@@ -42,6 +41,7 @@ export function withSSRAuth<P>(
         const response = await api.get('users/me/permissions')
         return response.data
       })
+
       const userHasPermission = validateUserHasPermissions(
         userPermissions,
         options
