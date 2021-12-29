@@ -103,7 +103,7 @@ interface VariationList {
 export default function SellItem({ product }: SellItemsProps) {
   const router = useRouter()
   const [modalScrollPos, setModalScrollPos] = useState(0)
-  const [isVariationsComplete, setIsVariationsComplete] = useState(false)
+  const [isVariationsComplete, setIsVariationsComplete] = useState(true)
   const productListingRef = useRef<HTMLDivElement>(null)
   const [products, setProducts] = useState<GetCatalogResponse['products']>([])
   const [search, setSearch] = useState<string>()
@@ -233,10 +233,16 @@ export default function SellItem({ product }: SellItemsProps) {
 
   useEffect(() => {
     const newVariationList: VariationList = []
+    setIsVariationsComplete(true)
+    setSelectedProducts({})
 
     mercadolivreItem?.variations.map(
       (variation) => (newVariationList[variation.id] = null)
     )
+
+    if (mercadolivreItem && !!mercadolivreItem.variations.length) {
+      setIsVariationsComplete(false)
+    }
 
     setVariationsList(newVariationList)
   }, [mercadolivreItem])
@@ -247,12 +253,25 @@ export default function SellItem({ product }: SellItemsProps) {
       mercadolivre_account: integration_id,
     }) => {
       try {
-        await api.post('/listings', {
-          code,
-          integration_id,
-          product_id: router.query.id,
-        })
-
+        if (!Object.keys(variationsList).length) {
+          await api.post('/listings', {
+            code,
+            integration_id,
+            product_id: router.query.id,
+          })
+        } else {
+          const variations = Object.entries(variationsList).map(
+            ([variationId, product]) => ({
+              variation_id: variationId,
+              product_id: product.id,
+            })
+          )
+          await api.post('/listings', {
+            variations,
+            code,
+            integration_id,
+          })
+        }
         toast({
           status: 'success',
           variant: 'solid',
@@ -284,9 +303,10 @@ export default function SellItem({ product }: SellItemsProps) {
       ...variationsList,
       [variationId]: null,
     })
+    let newSelectedProducts = selectedProducts
+    delete newSelectedProducts[product.id]
     setSelectedProducts({
-      ...selectedProducts,
-      [product.id]: undefined,
+      ...newSelectedProducts,
     })
   }
 
@@ -435,7 +455,7 @@ export default function SellItem({ product }: SellItemsProps) {
                 </ChakraLink>
               </Link>
             </Box>
-            {!!mercadolivreItem.variations.length || isVariationsComplete ? (
+            {!isVariationsComplete ? (
               <Text ml="auto" color="brand.500">
                 Aguardando preenchimento de variações
               </Text>
@@ -521,7 +541,9 @@ export default function SellItem({ product }: SellItemsProps) {
             <Button
               type="submit"
               isLoading={formState.isSubmitting}
-              isDisabled={!watch('mercadolivre_account_code')}
+              isDisabled={
+                !watch('mercadolivre_account_code') || !isVariationsComplete
+              }
               colorScheme="brand"
             >
               Salvar
@@ -658,16 +680,25 @@ export default function SellItem({ product }: SellItemsProps) {
 
 export const getServerSideProps = withSSRAuth(
   async (ctx) => {
-    const api = setupAPIClient(ctx)
-    const { id } = ctx.params
+    try {
+      const api = setupAPIClient(ctx)
+      const { id } = ctx.params
 
-    const { data: product } = await api.get(`products/${id}`)
+      const { data: product } = await api.get(`products/${id}`)
 
-    return {
-      props: {
-        product,
-        cookies: ctx.req.headers.cookie ?? '',
-      },
+      return {
+        props: {
+          product,
+          cookies: ctx.req.headers.cookie ?? '',
+        },
+      }
+    } catch (error) {
+      return {
+        redirect: {
+          destination: '/catalog',
+          permanent: false,
+        },
+      }
     }
   },
   {

@@ -54,9 +54,12 @@ export function setupAPIClient(ctx = undefined) {
                 })
                 .catch((error) => {
                   failedRequestsQueue.forEach((request) => {
-                    request.reject()
+                    request.reject(error)
                   })
                   failedRequestsQueue = []
+                  if (process.browser) {
+                    signOut()
+                  }
                 })
                 .finally(() => {
                   isRefreshingTheToken = false
@@ -76,16 +79,9 @@ export function setupAPIClient(ctx = undefined) {
                 },
               })
             })
-          } else {
-            if (process.browser) {
-              redirectToLogin()
-            } else {
-              return Promise.reject(new AuthTokenError())
-            }
           }
         } else {
-          signOut(ctx)
-          // return Promise.reject(new AuthTokenError())
+          return Promise.reject(new AuthTokenError())
         }
       }
       return Promise.reject(error)

@@ -54,7 +54,7 @@ class MercadoLivreAPI {
     client.interceptors.request.use(
       (request) => request,
       (error: AxiosError) => {
-        console.log(error)
+        console.error(error)
       }
     )
     return client
