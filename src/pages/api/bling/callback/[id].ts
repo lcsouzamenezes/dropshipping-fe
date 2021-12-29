@@ -39,7 +39,7 @@ export default async function handle(
           stock: estoque.estoqueAtual,
         })
         .catch((err) => {
-          console.log(err.response.data.message)
+          console.error(err.response.data.message)
         })
     } catch (error) {}
 

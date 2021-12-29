@@ -22,7 +22,7 @@ export default function AccountsActivation({ query }) {
 
       setIsActivated(true)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

@@ -20,17 +20,17 @@ export default function handler(
 
       switch (topic) {
         case 'orders_v2':
-          console.log('testing itens')
+          console.info('testing itens')
           break
         case 'invoices':
-          console.log('testing itens')
+          console.info('testing itens')
           break
 
         default:
           return response.status(200).end()
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return response.status(500).end()
     }
   }

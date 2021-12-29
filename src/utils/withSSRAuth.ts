@@ -31,34 +31,32 @@ export function withSSRAuth<P>(
         },
       }
     }
-
     if (options) {
-      const api = setupAPIClient(ctx)
-      const userPermissions = await queryClient.fetchQuery<{
-        permissions: string[]
-        roles: string[]
-      }>(cookies['@dropShipping.token'], async () => {
-        const response = await api.get('users/me/permissions')
-        return response.data
-      })
+      try {
+        const api = setupAPIClient(ctx)
+        const response = await api.get<{
+          permissions: string[]
+          roles: string[]
+        }>('users/me/permissions')
+        const userPermissions = response.data
 
-      const userHasPermission = validateUserHasPermissions(
-        userPermissions,
-        options
-      )
-      if (!userHasPermission) {
-        return {
-          notFound: true,
+        const userHasPermission = validateUserHasPermissions(
+          userPermissions,
+          options
+        )
+        if (!userHasPermission) {
+          return {
+            notFound: true,
+          }
         }
-      }
+      } catch (error) {}
     }
-
     try {
       return await fn(ctx)
     } catch (error) {
       if (error instanceof AuthTokenError) {
-        // destroyCookie(ctx, '@dropShipping.token')
-        // destroyCookie(ctx, '@dropShipping.refreshToken')
+        destroyCookie(ctx, '@dropShipping.token')
+        destroyCookie(ctx, '@dropShipping.refreshToken')
         return {
           redirect: {
             destination: '/',

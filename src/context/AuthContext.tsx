@@ -53,15 +53,13 @@ export function redirectToLogin() {
   Router.push('/')
 }
 
-export function signOut(ctx = undefined) {
-  destroyCookie(ctx, '@dropShipping.token')
-  destroyCookie(ctx, '@dropShipping.refreshToken')
+export function signOut() {
+  destroyCookie(undefined, '@dropShipping.token')
+  destroyCookie(undefined, '@dropShipping.refreshToken')
 
   if (authChannel) authChannel.postMessage('AUTH_SIGNOUT')
 
-  if (process.browser) {
-    redirectToLogin()
-  }
+  redirectToLogin()
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
