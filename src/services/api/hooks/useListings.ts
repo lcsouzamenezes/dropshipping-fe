@@ -7,6 +7,7 @@ interface Listing {
   active: boolean
   created_at: Date
   updated_at: Date
+  parent_code: string
   account: {
     id: string
     name: string
@@ -42,6 +43,7 @@ interface ListingsFormated {
   active: boolean
   created_at: Date
   updated_at: Date
+  parent_code: string
   account: {
     id: string
     name: string
