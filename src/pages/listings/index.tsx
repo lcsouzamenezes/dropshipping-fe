@@ -39,6 +39,7 @@ import Link from 'next/link'
 import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import Head from 'next/head'
+import { RiArrowRightLine } from 'react-icons/ri'
 
 type Listing = {
   id: string
@@ -146,8 +147,8 @@ export default function ListingsPage() {
                   </Th>
                   <Th>Produto</Th>
                   <Th>Preço</Th>
-                  <Th>Integração</Th>
-                  {isWideVersion && <Th>Estoque</Th>}
+                  <Th textAlign="center">Integração</Th>
+                  {isWideVersion && <Th textAlign="center">Estoque</Th>}
                   <Th width={['6', '6', '8']}>Ações</Th>
                 </Tr>
               </Thead>
@@ -159,10 +160,37 @@ export default function ListingsPage() {
                     </Td>
                     <Td>{listing.product.name}</Td>
                     <Td>{listing.product.price}</Td>
-                    <Td>
-                      <Text isTruncated>{listing.integration.description}</Text>
+                    <Td textAlign="center">
+                      <Badge colorScheme="blue">
+                        <Text isTruncated>
+                          {listing.integration.description}
+                        </Text>
+                      </Badge>
+                      {listing.parent_code ? (
+                        <Badge
+                          colorScheme="green"
+                          display="flex"
+                          alignItems="center"
+                          mt="1"
+                        >
+                          {listing.parent_code}
+                          <Icon as={RiArrowRightLine} ml="1" mr="1" />
+                          {listing.code}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          colorScheme="green"
+                          display="flex"
+                          alignItems="center"
+                          mt="1"
+                        >
+                          {listing.code}
+                        </Badge>
+                      )}
                     </Td>
-                    {isWideVersion && <Td>{listing.product.stock}</Td>}
+                    {isWideVersion && (
+                      <Td textAlign="center">{listing.product.stock}</Td>
+                    )}
                     <Td>
                       <Button
                         size="sm"
