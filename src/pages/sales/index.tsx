@@ -37,7 +37,7 @@ import { api } from '@/services/api/apiClient'
 import { Checkbox } from '@/components/Form/Checkbox'
 import { queryClient } from '@/services/queryClient'
 import Head from 'next/head'
-import { useSales } from '@/services/api/hooks/useSales'
+import { SaleFormated, useSales } from '@/services/api/hooks/useSales'
 import { File } from '@/components/Form/File'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
@@ -49,6 +49,7 @@ interface SendFilesFormData {
 
 export default function SalesPage() {
   const [page, setPage] = useState(1)
+  const [selectedSale, setSelectedSale] = useState<SaleFormated | null>(null)
   const [perPage, SetPerPage] = useState(20)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
@@ -113,7 +114,7 @@ export default function SalesPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 
-      onClose()
+      handleCloseModal()
 
       toast({
         status: 'success',
@@ -130,6 +131,11 @@ export default function SalesPage() {
         title: 'Falha ao atualizar os dados',
       })
     }
+  }
+
+  function handleCloseModal() {
+    setSelectedSale(null)
+    onClose()
   }
 
   return (
@@ -201,15 +207,24 @@ export default function SalesPage() {
                         </Td>
                         <Td>{sale.quantity}</Td>
                         <Td>
-                          <Badge variant="solid" colorScheme="yellow">
-                            pagamento pendente
-                          </Badge>
+                          {!sale.receipt || !sale.label ? (
+                            <Badge variant="solid" colorScheme="yellow">
+                              Documentos pendentes
+                            </Badge>
+                          ) : (
+                            <Badge variant="solid" colorScheme="blue">
+                              Aguardando envio
+                            </Badge>
+                          )}
                         </Td>
                         <Td>
                           <Stack direction="row">
                             <Button
                               size="sm"
-                              onClick={onOpen}
+                              onClick={() => {
+                                setSelectedSale(sale)
+                                onOpen()
+                              }}
                               colorScheme="brand"
                             >
                               Enviar Arquivos
@@ -242,7 +257,7 @@ export default function SalesPage() {
           </Box>
         </Flex>
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
         <ModalOverlay />
         <ModalContent
           as="form"
@@ -253,42 +268,111 @@ export default function SalesPage() {
           <ModalCloseButton />
           <ModalBody>
             <Stack>
-              <File
-                name="receipt"
-                label="Comprovante de pagamento (PDF)"
-                labelRightElement={
-                  <Badge ml="2" variant="solid" colorScheme="yellow">
-                    Pendente
-                  </Badge>
-                }
-                type="file"
-                error={errors.receipt}
-                {...register('receipt')}
-              />
-              <File
-                name="label"
-                label="Etiqueta (PDF)"
-                type="file"
-                labelRightElement={
-                  <Badge ml="2" variant="solid" colorScheme="yellow">
-                    Pendente
-                  </Badge>
-                }
-                error={errors.label}
-                {...register('label')}
-              />
-              <File
-                name="invoice"
-                label="NFe (PDF)"
-                type="file"
-                error={errors.invoice}
-                {...register('invoice')}
-              />
+              {selectedSale?.receipt ? (
+                <>
+                  <Text alignItems="center" fontWeight="medium" fontSize="md">
+                    Comprovante de pagamento (PDF)
+                  </Text>
+                  <Stack direction="row">
+                    <Link href={selectedSale.receipt} passHref>
+                      <Button as="a" colorScheme="brand">
+                        Ver Recibo
+                      </Button>
+                    </Link>
+                    <Button
+                      onClick={() =>
+                        setSelectedSale((prev) => ({ ...prev, receipt: null }))
+                      }
+                      colorScheme="red"
+                    >
+                      Remover
+                    </Button>
+                  </Stack>
+                </>
+              ) : (
+                <File
+                  name="receipt"
+                  label="Comprovante de pagamento (PDF)"
+                  labelRightElement={
+                    <Badge ml="2" variant="solid" colorScheme="yellow">
+                      Pendente
+                    </Badge>
+                  }
+                  type="file"
+                  error={errors.receipt}
+                  {...register('receipt')}
+                />
+              )}
+              {selectedSale?.label ? (
+                <>
+                  <Text alignItems="center" fontWeight="medium" fontSize="md">
+                    Etiqueta (PDF)
+                  </Text>
+                  <Stack direction="row">
+                    <Link href={selectedSale.label} passHref>
+                      <Button as="a" colorScheme="brand">
+                        Ver Etiqueta
+                      </Button>
+                    </Link>
+                    <Button
+                      onClick={() =>
+                        setSelectedSale((prev) => ({ ...prev, label: null }))
+                      }
+                      colorScheme="red"
+                    >
+                      Remover
+                    </Button>
+                  </Stack>
+                </>
+              ) : (
+                <File
+                  name="label"
+                  label="Etiqueta (PDF)"
+                  type="file"
+                  labelRightElement={
+                    <Badge ml="2" variant="solid" colorScheme="yellow">
+                      Pendente
+                    </Badge>
+                  }
+                  error={errors.label}
+                  {...register('label')}
+                />
+              )}
+              {selectedSale?.invoice ? (
+                <>
+                  <Text alignItems="center" fontWeight="medium" fontSize="md">
+                    NFe (PDF)
+                  </Text>
+                  <Stack direction="row">
+                    <Link href={selectedSale.invoice} passHref>
+                      <Button as="a" colorScheme="brand">
+                        Ver NFe (PDF)
+                      </Button>
+                    </Link>
+                    <Button
+                      onClick={() =>
+                        setSelectedSale((prev) => ({ ...prev, invoice: null }))
+                      }
+                      colorScheme="red"
+                    >
+                      Remover
+                    </Button>
+                  </Stack>
+                </>
+              ) : (
+                <File
+                  name="invoice"
+                  label="NFe (PDF)"
+                  type="file"
+                  error={errors.invoice}
+                  {...register('invoice')}
+                />
+              )}
             </Stack>
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+            <Button variant="ghost" mr={3} onClick={handleCloseModal}>
               Cancelar
             </Button>
             <Button

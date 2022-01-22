@@ -63,6 +63,7 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
     <FormControl isInvalid={!!error}>
       {!!label && (
         <Flex
+          as="label"
           htmlFor={name}
           id={`${name}-label`}
           mb="2"
