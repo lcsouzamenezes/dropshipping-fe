@@ -7,6 +7,7 @@ import {
   Input as ChakraInput,
   InputProps as ChakraInputProps,
   Button,
+  useColorModeValue,
 } from '@chakra-ui/react'
 
 import { FieldError } from 'react-hook-form'
@@ -16,8 +17,7 @@ import {
   forwardRef,
   ForwardRefRenderFunction,
   MouseEventHandler,
-  ReactElement,
-  useEffect,
+  ReactNode,
   useImperativeHandle,
   useRef,
   useState,
@@ -28,14 +28,23 @@ interface InputProps extends ChakraInputProps {
   label?: string
   error?: FieldError
   showRequiredLabel?: boolean
+  labelRightElement?: ReactNode
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
-  { name, label, error = null, showRequiredLabel = false, ...rest },
+  {
+    name,
+    label,
+    error = null,
+    showRequiredLabel = false,
+    labelRightElement,
+    ...rest
+  },
   ref
 ) => {
   const [file, setFile] = useState(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const bgColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
   useImperativeHandle(ref, () => inputRef.current)
 
@@ -53,13 +62,20 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
   return (
     <FormControl isInvalid={!!error}>
       {!!label && (
-        <Flex htmlFor={name} id={`${name}-label`} mb="2" fontWeight="medium">
+        <Flex
+          htmlFor={name}
+          id={`${name}-label`}
+          mb="2"
+          alignItems="center"
+          fontWeight="medium"
+        >
           {label}
           {showRequiredLabel && (
             <Text as="span" color="red" ml="0.5">
               *
             </Text>
           )}
+          {labelRightElement && labelRightElement}
         </Flex>
       )}
       <ChakraInput
@@ -70,17 +86,31 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
         variant="unstyled"
         {...rest}
         hidden
-        onChange={handleFileChange}
+        onChange={(e) => {
+          handleFileChange(e)
+          if (typeof rest.onChange === 'function') {
+            rest.onChange(e)
+          }
+        }}
       />
       {!file ? (
-        <FormLabel cursor="pointer" htmlFor={name}>
+        <FormLabel display="inline-flex" cursor="pointer" htmlFor={name}>
           <Button as="span" colorScheme="brand">
             Selecionar arquivo
           </Button>
         </FormLabel>
       ) : (
-        <Flex alignItems="center">
-          <Text isTruncated as="i" title={file.name}>
+        <Flex alignItems="center" justifyContent="space-between">
+          <Text
+            isTruncated
+            as="i"
+            bgColor={bgColor}
+            p="2"
+            w="100%"
+            mr="2"
+            borderRadius="md"
+            title={file.name}
+          >
             {file.name}
           </Text>
           <Button onClick={handleRemoveFile} colorScheme="red">
