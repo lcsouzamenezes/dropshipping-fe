@@ -12,6 +12,9 @@ type GetSales = Array<{
   receipt: string
   label: string
   invoice: string
+  receipt_url: string
+  label_url: string
+  invoice_url: string
   listing: {
     id: string
     code: string
@@ -35,6 +38,9 @@ export interface SaleFormated {
   receipt: string
   label: string
   invoice: string
+  receipt_url: string
+  label_url: string
+  invoice_url: string
   account: {
     id: string
     name: string

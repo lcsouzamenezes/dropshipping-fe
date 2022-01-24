@@ -8,6 +8,7 @@ import {
   InputProps as ChakraInputProps,
   Button,
   useColorModeValue,
+  InputGroup,
 } from '@chakra-ui/react'
 
 import { FieldError } from 'react-hook-form'
@@ -17,6 +18,7 @@ import {
   forwardRef,
   ForwardRefRenderFunction,
   MouseEventHandler,
+  ReactElement,
   ReactNode,
   useImperativeHandle,
   useRef,
@@ -27,6 +29,7 @@ interface InputProps extends ChakraInputProps {
   name: string
   label?: string
   error?: FieldError
+  leftElement?: ReactElement
   showRequiredLabel?: boolean
   labelRightElement?: ReactNode
 }
@@ -36,6 +39,7 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
     name,
     label,
     error = null,
+    leftElement,
     showRequiredLabel = false,
     labelRightElement,
     ...rest
@@ -96,6 +100,7 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
       />
       {!file ? (
         <FormLabel display="inline-flex" cursor="pointer" htmlFor={name}>
+          {leftElement && leftElement}
           <Button as="span" colorScheme="brand">
             Selecionar arquivo
           </Button>

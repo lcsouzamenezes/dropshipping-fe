@@ -26,6 +26,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  InputLeftAddon,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
@@ -110,9 +111,13 @@ export default function SalesPage() {
     formData.append('invoice', values.invoice[0])
 
     try {
-      const response = await api.patch('/sales/files', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      const response = await api.patch(
+        `/sales/${selectedSale.id}/files`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      )
 
       handleCloseModal()
 
@@ -268,106 +273,81 @@ export default function SalesPage() {
           <ModalCloseButton />
           <ModalBody>
             <Stack>
-              {selectedSale?.receipt ? (
-                <>
-                  <Text alignItems="center" fontWeight="medium" fontSize="md">
-                    Comprovante de pagamento (PDF)
-                  </Text>
-                  <Stack direction="row">
-                    <Link href={selectedSale.receipt} passHref>
-                      <Button as="a" colorScheme="brand">
-                        Ver Recibo
+              <File
+                name="receipt"
+                label="Comprovante de pagamento (PDF)"
+                labelRightElement={
+                  <Badge
+                    ml="2"
+                    variant="solid"
+                    colorScheme={selectedSale?.receipt_url ? 'green' : 'yellow'}
+                  >
+                    {selectedSale?.receipt_url ? 'Enviado' : 'Pendente'}
+                  </Badge>
+                }
+                type="file"
+                leftElement={
+                  selectedSale?.receipt_url && (
+                    <Link href={selectedSale?.receipt_url} passHref>
+                      <Button as="a" colorScheme="brand" marginRight="1">
+                        Ver arquivo
                       </Button>
                     </Link>
-                    <Button
-                      onClick={() =>
-                        setSelectedSale((prev) => ({ ...prev, receipt: null }))
-                      }
-                      colorScheme="red"
-                    >
-                      Remover
-                    </Button>
-                  </Stack>
-                </>
-              ) : (
-                <File
-                  name="receipt"
-                  label="Comprovante de pagamento (PDF)"
-                  labelRightElement={
-                    <Badge ml="2" variant="solid" colorScheme="yellow">
-                      Pendente
+                  )
+                }
+                error={errors.receipt}
+                {...register('receipt')}
+              />
+
+              <File
+                name="label"
+                label="Etiqueta (PDF)"
+                type="file"
+                labelRightElement={
+                  <Badge
+                    ml="2"
+                    variant="solid"
+                    colorScheme={selectedSale?.label ? 'green' : 'yellow'}
+                  >
+                    {selectedSale?.label ? 'Enviado' : 'Pendente'}
+                  </Badge>
+                }
+                leftElement={
+                  selectedSale?.label_url && (
+                    <Link href={selectedSale?.label_url} passHref>
+                      <Button as="a" colorScheme="brand" marginRight="1">
+                        Ver arquivo
+                      </Button>
+                    </Link>
+                  )
+                }
+                error={errors.label}
+                {...register('label')}
+              />
+
+              <File
+                name="invoice"
+                label="NFe (PDF)"
+                type="file"
+                error={errors.invoice}
+                labelRightElement={
+                  selectedSale && (
+                    <Badge ml="2" variant="solid" colorScheme="green">
+                      Enviado
                     </Badge>
-                  }
-                  type="file"
-                  error={errors.receipt}
-                  {...register('receipt')}
-                />
-              )}
-              {selectedSale?.label ? (
-                <>
-                  <Text alignItems="center" fontWeight="medium" fontSize="md">
-                    Etiqueta (PDF)
-                  </Text>
-                  <Stack direction="row">
-                    <Link href={selectedSale.label} passHref>
-                      <Button as="a" colorScheme="brand">
-                        Ver Etiqueta
+                  )
+                }
+                leftElement={
+                  selectedSale?.invoice_url && (
+                    <Link href={selectedSale?.invoice_url} passHref>
+                      <Button as="a" colorScheme="brand" marginRight="1">
+                        Ver arquivo
                       </Button>
                     </Link>
-                    <Button
-                      onClick={() =>
-                        setSelectedSale((prev) => ({ ...prev, label: null }))
-                      }
-                      colorScheme="red"
-                    >
-                      Remover
-                    </Button>
-                  </Stack>
-                </>
-              ) : (
-                <File
-                  name="label"
-                  label="Etiqueta (PDF)"
-                  type="file"
-                  labelRightElement={
-                    <Badge ml="2" variant="solid" colorScheme="yellow">
-                      Pendente
-                    </Badge>
-                  }
-                  error={errors.label}
-                  {...register('label')}
-                />
-              )}
-              {selectedSale?.invoice ? (
-                <>
-                  <Text alignItems="center" fontWeight="medium" fontSize="md">
-                    NFe (PDF)
-                  </Text>
-                  <Stack direction="row">
-                    <Link href={selectedSale.invoice} passHref>
-                      <Button as="a" colorScheme="brand">
-                        Ver NFe (PDF)
-                      </Button>
-                    </Link>
-                    <Button
-                      onClick={() =>
-                        setSelectedSale((prev) => ({ ...prev, invoice: null }))
-                      }
-                      colorScheme="red"
-                    >
-                      Remover
-                    </Button>
-                  </Stack>
-                </>
-              ) : (
-                <File
-                  name="invoice"
-                  label="NFe (PDF)"
-                  type="file"
-                  error={errors.invoice}
-                  {...register('invoice')}
-                />
-              )}
+                  )
+                }
+                {...register('invoice')}
+              />
             </Stack>
           </ModalBody>
 
@@ -389,11 +369,3 @@ export default function SalesPage() {
     </>
   )
 }
-
-export const getServerSideProps = withSSRAuth(async (ctx) => {
-  return {
-    props: {
-      cookies: ctx.req.headers.cookie ?? '',
-    },
-  }
-})
