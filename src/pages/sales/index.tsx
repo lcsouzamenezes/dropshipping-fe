@@ -289,7 +289,12 @@ export default function SalesPage() {
                 leftElement={
                   selectedSale?.receipt_url && (
                     <Link href={selectedSale?.receipt_url} passHref>
-                      <Button as="a" colorScheme="brand" marginRight="1">
+                      <Button
+                        as="a"
+                        colorScheme="brand"
+                        target="_blank"
+                        marginRight="1"
+                      >
                         Ver arquivo
                       </Button>
                     </Link>
@@ -315,7 +320,12 @@ export default function SalesPage() {
                 leftElement={
                   selectedSale?.label_url && (
                     <Link href={selectedSale?.label_url} passHref>
-                      <Button as="a" colorScheme="brand" marginRight="1">
+                      <Button
+                        as="a"
+                        colorScheme="brand"
+                        target="_blank"
+                        marginRight="1"
+                      >
                         Ver arquivo
                       </Button>
                     </Link>
@@ -331,7 +341,7 @@ export default function SalesPage() {
                 type="file"
                 error={errors.invoice}
                 labelRightElement={
-                  selectedSale && (
+                  selectedSale?.invoice_url && (
                     <Badge ml="2" variant="solid" colorScheme="green">
                       Enviado
                     </Badge>
@@ -340,7 +350,12 @@ export default function SalesPage() {
                 leftElement={
                   selectedSale?.invoice_url && (
                     <Link href={selectedSale?.invoice_url} passHref>
-                      <Button as="a" colorScheme="brand" marginRight="1">
+                      <Button
+                        as="a"
+                        target="_blank"
+                        colorScheme="brand"
+                        marginRight="1"
+                      >
                         Ver arquivo
                       </Button>
                     </Link>
