@@ -127,6 +127,12 @@ export default function ListingsPage() {
                 Ver Catalogo
               </Button>
             </Link>
+            <Link href="/catalog" passHref>
+              <Button as="a" size="sm" fontSize="sm" colorScheme="brand">
+                <Icon as={RiAddLine} fontSize={20} mr="1" />
+                Criar
+              </Button>
+            </Link>
           </Stack>
         </Flex>
         {isLoading ? (
