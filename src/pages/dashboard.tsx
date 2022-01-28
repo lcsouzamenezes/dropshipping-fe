@@ -83,7 +83,7 @@ export default function Dashboard(props: DashboardProps) {
         <meta property="og:title" content="Dashboard - Outter DS" key="title" />
       </Head>
       <Flex w="100%" direction="column">
-        {!props.profile?.profile.id && (
+        {!props.profile?.profile?.id && (
           <Link href="profile" passHref>
             <Alert as="a" status="warning" mb="2" borderRadius="base">
               <AlertIcon />
