@@ -33,6 +33,7 @@ import {
   MenuItem,
   MenuDivider,
   IconButton,
+  Center,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
@@ -55,6 +56,7 @@ import {
   RiCloseLine,
   RiDownloadLine,
 } from 'react-icons/ri'
+import { Select } from '@/components/Form/Select'
 
 interface SendFilesFormData {
   receipt: FileList
@@ -63,10 +65,39 @@ interface SendFilesFormData {
 }
 
 export default function SalesPage() {
+  const statusMapper = {
+    pending: {
+      name: 'Pendente',
+      color: 'yellow',
+    },
+    wait_shipment: {
+      name: 'Aguardando Envio',
+      color: 'blue',
+    },
+    shipped: {
+      name: 'Enviado',
+      color: 'green',
+    },
+    done: {
+      name: 'Finalizado',
+      color: 'gray',
+    },
+    canceled: {
+      name: 'Cancelado',
+      color: 'red',
+    },
+  }
+
   const [page, setPage] = useState(1)
+  const [newStatus, setNewStatus] = useState<string | null>(null)
   const [selectedSale, setSelectedSale] = useState<SaleFormated | null>(null)
   const [perPage, SetPerPage] = useState(20)
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: isOpenStatus,
+    onOpen: onOpenStatus,
+    onClose: onCloseStatus,
+  } = useDisclosure()
   const toast = useToast()
 
   const { user } = useAuth()
@@ -158,18 +189,12 @@ export default function SalesPage() {
     onClose()
   }
 
-  function renderSaleStatus({ status }) {
-    const statusMapper = {
-      pending: {
-        name: 'Pendente',
-        color: 'yellow',
-      },
-      waiting_shipping: {
-        name: 'Aguardando Envio',
-        color: 'blue',
-      },
-    }
+  function handleCloseStatusModal() {
+    setSelectedSale(null)
+    onCloseStatus()
+  }
 
+  function renderSaleStatus({ status }) {
     return (
       <Badge variant="solid" colorScheme={statusMapper[status].color}>
         {statusMapper[status].name}
@@ -177,7 +202,7 @@ export default function SalesPage() {
     )
   }
 
-  function renderSupplierActions(sale) {
+  function renderSupplierActions(sale: SaleFormated) {
     return (
       <Menu>
         <MenuButton
@@ -191,7 +216,6 @@ export default function SalesPage() {
         </MenuButton>
         <MenuList>
           <MenuItem
-            icon={<Icon as={RiFileCopy2Line} />}
             onClick={() => {
               setSelectedSale(sale)
               onOpen()
@@ -199,15 +223,20 @@ export default function SalesPage() {
           >
             Ver Arquivos
           </MenuItem>
-          <MenuItem icon={<Icon as={RiTruckLine} />}>
-            Marcar como enviado
+          <MenuItem
+            onClick={() => {
+              setSelectedSale(sale)
+              onOpenStatus()
+            }}
+          >
+            Alterar Status
           </MenuItem>
         </MenuList>
       </Menu>
     )
   }
 
-  function renderSellerActions(sale) {
+  function renderSellerActions(sale: SaleFormated) {
     return (
       <Menu>
         <MenuButton
@@ -234,6 +263,23 @@ export default function SalesPage() {
         </MenuList>
       </Menu>
     )
+  }
+
+  async function handleSaveNewStatusClick() {
+    try {
+      const response = await api.patch(`/sales/${selectedSale.id}/status`, {
+        status: newStatus,
+      })
+      console.log(response)
+      handleCloseStatusModal()
+    } catch (err) {
+      toast({
+        status: 'error',
+        variant: 'solid',
+        position: 'top',
+        title: 'Falha ao atualizar os dados',
+      })
+    }
   }
 
   return (
@@ -353,6 +399,47 @@ export default function SalesPage() {
           </Box>
         </Flex>
       </Box>
+      <Modal isOpen={isOpenStatus} onClose={handleCloseStatusModal} size="sm">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Alterar Status</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Select
+              value={newStatus}
+              onChange={(e) => {
+                setNewStatus(e.target.value)
+              }}
+              name="status"
+              label="Status"
+            >
+              {Object.keys(statusMapper).map((status) => {
+                if (['pending', 'done'].includes(status)) return
+                return (
+                  <option
+                    selected={selectedSale?.status === status}
+                    value={status}
+                  >
+                    {statusMapper[status].name}
+                  </option>
+                )
+              })}
+            </Select>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={handleCloseStatusModal}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => handleSaveNewStatusClick()}
+              variant="solid"
+              colorScheme="brand"
+            >
+              Salvar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       {user?.roles.includes('supplier') ? (
         <Modal isOpen={isOpen} onClose={handleCloseModal} size="sm">
           <ModalOverlay />
@@ -397,7 +484,6 @@ export default function SalesPage() {
                 </Link>
               </Stack>
             </ModalBody>
-            <ModalFooter></ModalFooter>
           </ModalContent>
         </Modal>
       ) : (
