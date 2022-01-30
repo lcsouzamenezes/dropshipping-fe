@@ -26,7 +26,16 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  InputLeftAddon,
+  Icon,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
+  IconButton,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
@@ -41,6 +50,13 @@ import Head from 'next/head'
 import { SaleFormated, useSales } from '@/services/api/hooks/useSales'
 import { File } from '@/components/Form/File'
 import { SubmitHandler, useForm } from 'react-hook-form'
+import { useAuth } from 'context/AuthContext'
+import {
+  RiTruckLine,
+  RiMenuLine,
+  RiFileCopy2Line,
+  RiCloseLine,
+} from 'react-icons/ri'
 
 interface SendFilesFormData {
   receipt: FileList
@@ -55,6 +71,7 @@ export default function SalesPage() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
 
+  const { user } = useAuth()
   const { isFetching, isLoading, error, data } = useSales(page, perPage)
 
   const { register, handleSubmit, formState, setError, clearErrors } = useForm({
@@ -143,6 +160,84 @@ export default function SalesPage() {
     onClose()
   }
 
+  function renderSaleStatus({ status }) {
+    const statusMapper = {
+      pending: {
+        name: 'Pendente',
+        color: 'yellow',
+      },
+      waiting_shipping: {
+        name: 'Aguardando Envio',
+        color: 'blue',
+      },
+    }
+
+    return (
+      <Badge variant="solid" colorScheme={statusMapper[status].color}>
+        {statusMapper[status].name}
+      </Badge>
+    )
+  }
+
+  function renderSupplierActions(sale) {
+    return (
+      <Menu>
+        <MenuButton
+          as={IconButton}
+          size="sm"
+          aria-label="Options"
+          icon={<Icon as={RiMenuLine} />}
+          variant="outline"
+        >
+          Actions
+        </MenuButton>
+        <MenuList>
+          <MenuItem
+            icon={<Icon as={RiFileCopy2Line} />}
+            onClick={() => {
+              setSelectedSale(sale)
+              onOpen()
+            }}
+          >
+            Ver Arquivos
+          </MenuItem>
+          <MenuItem icon={<Icon as={RiTruckLine} />}>
+            Marcar como enviado
+          </MenuItem>
+        </MenuList>
+      </Menu>
+    )
+  }
+
+  function renderSellerActions(sale) {
+    return (
+      <Menu>
+        <MenuButton
+          as={IconButton}
+          size="sm"
+          aria-label="Options"
+          icon={<Icon as={RiMenuLine} />}
+          variant="outline"
+        >
+          Actions
+        </MenuButton>
+        <MenuList>
+          <MenuItem
+            icon={<Icon as={RiFileCopy2Line} />}
+            onClick={() => {
+              setSelectedSale(sale)
+              onOpen()
+            }}
+          >
+            Enviar Arquivos
+          </MenuItem>
+          <MenuDivider />
+          <MenuItem icon={<Icon as={RiCloseLine} />}>Cancelar Pedido</MenuItem>
+        </MenuList>
+      </Menu>
+    )
+  }
+
   return (
     <>
       <Box>
@@ -175,10 +270,15 @@ export default function SalesPage() {
                 <Table>
                   <Thead>
                     <Tr>
-                      <Th px={['4', '4', '6']} color="gray.500" width="8">
+                      {/* <Th px={['4', '4', '6']} color="gray.500" width="8">
                         <Checkbox colorScheme="brand" />
-                      </Th>
+                      </Th> */}
                       <Th>Produto</Th>
+                      <Th>
+                        {user?.roles.includes('supplier')
+                          ? 'Cliente'
+                          : 'Fornecedor'}
+                      </Th>
                       {isWideVersion && <Th>Quantidade</Th>}
                       <Th>Status</Th>
                       <Th width={['6', '6', '8']}></Th>
@@ -187,9 +287,9 @@ export default function SalesPage() {
                   <Tbody>
                     {data.sales.map((sale) => (
                       <Tr key={sale.id}>
-                        <Td px={['4', '4', '6']}>
+                        {/* <Td px={['4', '4', '6']}>
                           <Checkbox colorScheme="brand" />
-                        </Td>
+                        </Td> */}
                         <Td>
                           <Box>
                             <Link
@@ -200,43 +300,36 @@ export default function SalesPage() {
                                 onMouseEnter={() => handlePrefetchSale(sale.id)}
                                 color="brand.500"
                               >
-                                <Text fontWeight="bold">
+                                <Text fontSize="sm" fontWeight="bold">
                                   {sale.listing.product.name}
                                 </Text>
                               </Chakralink>
                             </Link>
-                            <Text fontSize="sm" color="gray.500">
+                            <Text fontSize="xs" color="gray.500">
                               ({sale.listing.product.sku})
                             </Text>
                           </Box>
                         </Td>
+                        <Td>
+                          {user?.roles.includes('supplier')
+                            ? sale.account.name
+                            : sale.listing.product.account.name}
+                        </Td>
                         <Td>{sale.quantity}</Td>
                         <Td>
-                          {!sale.receipt || !sale.label ? (
-                            <Badge variant="solid" colorScheme="yellow">
-                              Documentos pendentes
-                            </Badge>
-                          ) : (
-                            <Badge variant="solid" colorScheme="blue">
-                              Aguardando envio
-                            </Badge>
-                          )}
+                          {!sale.receipt ||
+                            (!sale.label && (
+                              <Badge variant="solid" colorScheme="yellow">
+                                Documentos pendentes
+                              </Badge>
+                            ))}
+                          {renderSaleStatus(sale)}
                         </Td>
                         <Td>
                           <Stack direction="row">
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setSelectedSale(sale)
-                                onOpen()
-                              }}
-                              colorScheme="brand"
-                            >
-                              Enviar Arquivos
-                            </Button>
-                            <Button size="sm" colorScheme="red">
-                              Cancelar
-                            </Button>
+                            {user?.roles.includes('supplier')
+                              ? renderSupplierActions(sale)
+                              : renderSellerActions(sale)}
                           </Stack>
                         </Td>
                       </Tr>
@@ -384,3 +477,11 @@ export default function SalesPage() {
     </>
   )
 }
+
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  return {
+    props: {
+      cookies: ctx.req.headers.cookie ?? '',
+    },
+  }
+})

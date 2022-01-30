@@ -9,6 +9,7 @@ type GetSales = Array<{
     name: string
     type: string
   }
+  status: string
   receipt: string
   label: string
   invoice: string
@@ -23,6 +24,10 @@ type GetSales = Array<{
       id: string
       name: string
       sku: string
+      account: {
+        id: string
+        name: string
+      }
     }
     integration: {
       id: string
@@ -35,6 +40,7 @@ type GetSales = Array<{
 export interface SaleFormated {
   id: string
   quantity: number
+  status: string
   receipt: string
   label: string
   invoice: string
@@ -54,6 +60,10 @@ export interface SaleFormated {
       id: string
       name: string
       sku: string
+      account: {
+        id: string
+        name: string
+      }
     }
     integration: {
       id: string
