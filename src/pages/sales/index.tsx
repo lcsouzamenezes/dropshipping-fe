@@ -31,11 +31,9 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
   MenuDivider,
   IconButton,
+  Center,
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { Pagination } from '../../components/Pagination'
@@ -56,7 +54,9 @@ import {
   RiMenuLine,
   RiFileCopy2Line,
   RiCloseLine,
+  RiDownloadLine,
 } from 'react-icons/ri'
+import { Select } from '@/components/Form/Select'
 
 interface SendFilesFormData {
   receipt: FileList
@@ -65,10 +65,39 @@ interface SendFilesFormData {
 }
 
 export default function SalesPage() {
+  const statusMapper = {
+    pending: {
+      name: 'Pendente',
+      color: 'yellow',
+    },
+    wait_shipment: {
+      name: 'Aguardando Envio',
+      color: 'blue',
+    },
+    shipped: {
+      name: 'Enviado',
+      color: 'green',
+    },
+    done: {
+      name: 'Finalizado',
+      color: 'gray',
+    },
+    canceled: {
+      name: 'Cancelado',
+      color: 'red',
+    },
+  }
+
   const [page, setPage] = useState(1)
+  const [newStatus, setNewStatus] = useState<string | null>(null)
   const [selectedSale, setSelectedSale] = useState<SaleFormated | null>(null)
   const [perPage, SetPerPage] = useState(20)
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: isOpenStatus,
+    onOpen: onOpenStatus,
+    onClose: onCloseStatus,
+  } = useDisclosure()
   const toast = useToast()
 
   const { user } = useAuth()
@@ -160,18 +189,12 @@ export default function SalesPage() {
     onClose()
   }
 
-  function renderSaleStatus({ status }) {
-    const statusMapper = {
-      pending: {
-        name: 'Pendente',
-        color: 'yellow',
-      },
-      waiting_shipping: {
-        name: 'Aguardando Envio',
-        color: 'blue',
-      },
-    }
+  function handleCloseStatusModal() {
+    setSelectedSale(null)
+    onCloseStatus()
+  }
 
+  function renderSaleStatus({ status }) {
     return (
       <Badge variant="solid" colorScheme={statusMapper[status].color}>
         {statusMapper[status].name}
@@ -179,7 +202,7 @@ export default function SalesPage() {
     )
   }
 
-  function renderSupplierActions(sale) {
+  function renderSupplierActions(sale: SaleFormated) {
     return (
       <Menu>
         <MenuButton
@@ -193,7 +216,6 @@ export default function SalesPage() {
         </MenuButton>
         <MenuList>
           <MenuItem
-            icon={<Icon as={RiFileCopy2Line} />}
             onClick={() => {
               setSelectedSale(sale)
               onOpen()
@@ -201,15 +223,20 @@ export default function SalesPage() {
           >
             Ver Arquivos
           </MenuItem>
-          <MenuItem icon={<Icon as={RiTruckLine} />}>
-            Marcar como enviado
+          <MenuItem
+            onClick={() => {
+              setSelectedSale(sale)
+              onOpenStatus()
+            }}
+          >
+            Alterar Status
           </MenuItem>
         </MenuList>
       </Menu>
     )
   }
 
-  function renderSellerActions(sale) {
+  function renderSellerActions(sale: SaleFormated) {
     return (
       <Menu>
         <MenuButton
@@ -236,6 +263,23 @@ export default function SalesPage() {
         </MenuList>
       </Menu>
     )
+  }
+
+  async function handleSaveNewStatusClick() {
+    try {
+      const response = await api.patch(`/sales/${selectedSale.id}/status`, {
+        status: newStatus,
+      })
+      console.log(response)
+      handleCloseStatusModal()
+    } catch (err) {
+      toast({
+        status: 'error',
+        variant: 'solid',
+        position: 'top',
+        title: 'Falha ao atualizar os dados',
+      })
+    }
   }
 
   return (
@@ -355,117 +399,39 @@ export default function SalesPage() {
           </Box>
         </Flex>
       </Box>
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
+      <Modal isOpen={isOpenStatus} onClose={handleCloseStatusModal} size="sm">
         <ModalOverlay />
-        <ModalContent
-          as="form"
-          encType="multipart/form-data"
-          onSubmit={handleSubmit(handleFilesFormSubmit)}
-        >
-          <ModalHeader>Enviar Arquivos</ModalHeader>
+        <ModalContent>
+          <ModalHeader>Alterar Status</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Stack>
-              <File
-                name="receipt"
-                label="Comprovante de pagamento (PDF)"
-                labelRightElement={
-                  <Badge
-                    ml="2"
-                    variant="solid"
-                    colorScheme={selectedSale?.receipt_url ? 'green' : 'yellow'}
+            <Select
+              value={newStatus}
+              onChange={(e) => {
+                setNewStatus(e.target.value)
+              }}
+              name="status"
+              label="Status"
+            >
+              {Object.keys(statusMapper).map((status) => {
+                if (['pending', 'done'].includes(status)) return
+                return (
+                  <option
+                    selected={selectedSale?.status === status}
+                    value={status}
                   >
-                    {selectedSale?.receipt_url ? 'Enviado' : 'Pendente'}
-                  </Badge>
-                }
-                type="file"
-                leftElement={
-                  selectedSale?.receipt_url && (
-                    <Link href={selectedSale?.receipt_url} passHref>
-                      <Button
-                        as="a"
-                        colorScheme="brand"
-                        target="_blank"
-                        marginRight="1"
-                      >
-                        Ver arquivo
-                      </Button>
-                    </Link>
-                  )
-                }
-                error={errors.receipt}
-                {...register('receipt')}
-              />
-
-              <File
-                name="label"
-                label="Etiqueta (PDF)"
-                type="file"
-                labelRightElement={
-                  <Badge
-                    ml="2"
-                    variant="solid"
-                    colorScheme={selectedSale?.label ? 'green' : 'yellow'}
-                  >
-                    {selectedSale?.label ? 'Enviado' : 'Pendente'}
-                  </Badge>
-                }
-                leftElement={
-                  selectedSale?.label_url && (
-                    <Link href={selectedSale?.label_url} passHref>
-                      <Button
-                        as="a"
-                        colorScheme="brand"
-                        target="_blank"
-                        marginRight="1"
-                      >
-                        Ver arquivo
-                      </Button>
-                    </Link>
-                  )
-                }
-                error={errors.label}
-                {...register('label')}
-              />
-
-              <File
-                name="invoice"
-                label="NFe (PDF)"
-                type="file"
-                error={errors.invoice}
-                labelRightElement={
-                  selectedSale?.invoice_url && (
-                    <Badge ml="2" variant="solid" colorScheme="green">
-                      Enviado
-                    </Badge>
-                  )
-                }
-                leftElement={
-                  selectedSale?.invoice_url && (
-                    <Link href={selectedSale?.invoice_url} passHref>
-                      <Button
-                        as="a"
-                        target="_blank"
-                        colorScheme="brand"
-                        marginRight="1"
-                      >
-                        Ver arquivo
-                      </Button>
-                    </Link>
-                  )
-                }
-                {...register('invoice')}
-              />
-            </Stack>
+                    {statusMapper[status].name}
+                  </option>
+                )
+              })}
+            </Select>
           </ModalBody>
-
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleCloseModal}>
+            <Button variant="ghost" mr={3} onClick={handleCloseStatusModal}>
               Cancelar
             </Button>
             <Button
-              isLoading={formState.isSubmitting}
-              type="submit"
+              onClick={() => handleSaveNewStatusClick()}
               variant="solid"
               colorScheme="brand"
             >
@@ -474,6 +440,175 @@ export default function SalesPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      {user?.roles.includes('supplier') ? (
+        <Modal isOpen={isOpen} onClose={handleCloseModal} size="sm">
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Download de Arquivos</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Stack>
+                <Link href={selectedSale?.receipt_url ?? '#'} passHref>
+                  <Button
+                    as="a"
+                    target="_blank"
+                    leftIcon={<Icon as={RiDownloadLine} />}
+                    disabled={!selectedSale?.receipt_url}
+                    colorScheme="brand"
+                  >
+                    Comprovante de Pagamento{' '}
+                    {!selectedSale?.receipt_url && '(Pendente)'}
+                  </Button>
+                </Link>
+                <Link href={selectedSale?.label_url ?? '#'} passHref>
+                  <Button
+                    as="a"
+                    target="_blank"
+                    leftIcon={<Icon as={RiDownloadLine} />}
+                    disabled={!selectedSale?.label_url}
+                    colorScheme="brand"
+                  >
+                    Etiqueta {!selectedSale?.label_url && '(Pendente)'}
+                  </Button>
+                </Link>
+                <Link href={selectedSale?.invoice_url ?? '#'} passHref>
+                  <Button
+                    as="a"
+                    target="_blank"
+                    leftIcon={<Icon as={RiDownloadLine} />}
+                    disabled={!selectedSale?.invoice_url}
+                    colorScheme="brand"
+                  >
+                    Nota Fiscal {!selectedSale?.invoice_url && '(Pendente)'}
+                  </Button>
+                </Link>
+              </Stack>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      ) : (
+        <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
+          <ModalOverlay />
+          <ModalContent
+            as="form"
+            encType="multipart/form-data"
+            onSubmit={handleSubmit(handleFilesFormSubmit)}
+          >
+            <ModalHeader>Enviar Arquivos</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Stack>
+                <File
+                  name="receipt"
+                  label="Comprovante de pagamento (PDF)"
+                  labelRightElement={
+                    <Badge
+                      ml="2"
+                      variant="solid"
+                      colorScheme={
+                        selectedSale?.receipt_url ? 'green' : 'yellow'
+                      }
+                    >
+                      {selectedSale?.receipt_url ? 'Enviado' : 'Pendente'}
+                    </Badge>
+                  }
+                  type="file"
+                  leftElement={
+                    selectedSale?.receipt_url && (
+                      <Link href={selectedSale?.receipt_url} passHref>
+                        <Button
+                          as="a"
+                          colorScheme="brand"
+                          target="_blank"
+                          marginRight="1"
+                        >
+                          Ver arquivo
+                        </Button>
+                      </Link>
+                    )
+                  }
+                  error={errors.receipt}
+                  {...register('receipt')}
+                />
+
+                <File
+                  name="label"
+                  label="Etiqueta (PDF)"
+                  type="file"
+                  labelRightElement={
+                    <Badge
+                      ml="2"
+                      variant="solid"
+                      colorScheme={selectedSale?.label ? 'green' : 'yellow'}
+                    >
+                      {selectedSale?.label ? 'Enviado' : 'Pendente'}
+                    </Badge>
+                  }
+                  leftElement={
+                    selectedSale?.label_url && (
+                      <Link href={selectedSale?.label_url} passHref>
+                        <Button
+                          as="a"
+                          colorScheme="brand"
+                          target="_blank"
+                          marginRight="1"
+                        >
+                          Ver arquivo
+                        </Button>
+                      </Link>
+                    )
+                  }
+                  error={errors.label}
+                  {...register('label')}
+                />
+
+                <File
+                  name="invoice"
+                  label="NFe (PDF)"
+                  type="file"
+                  error={errors.invoice}
+                  labelRightElement={
+                    selectedSale?.invoice_url && (
+                      <Badge ml="2" variant="solid" colorScheme="green">
+                        Enviado
+                      </Badge>
+                    )
+                  }
+                  leftElement={
+                    selectedSale?.invoice_url && (
+                      <Link href={selectedSale?.invoice_url} passHref>
+                        <Button
+                          as="a"
+                          target="_blank"
+                          colorScheme="brand"
+                          marginRight="1"
+                        >
+                          Ver arquivo
+                        </Button>
+                      </Link>
+                    )
+                  }
+                  {...register('invoice')}
+                />
+              </Stack>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button variant="ghost" mr={3} onClick={handleCloseModal}>
+                Cancelar
+              </Button>
+              <Button
+                isLoading={formState.isSubmitting}
+                type="submit"
+                variant="solid"
+                colorScheme="brand"
+              >
+                Salvar
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </>
   )
 }
