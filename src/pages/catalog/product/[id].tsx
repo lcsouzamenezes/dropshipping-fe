@@ -296,6 +296,7 @@ export const getServerSideProps = withSSRAuth<{
   blingProduct: any
 }>(async (ctx) => {
   const api = setupAPIClient(ctx)
+
   const { data: product } = await api.get(`products/${ctx.params.id}`)
 
   product.price = product.price.toLocaleString('pt-BR', {
@@ -304,8 +305,14 @@ export const getServerSideProps = withSSRAuth<{
   })
 
   const { data: integration } = await api.get(
-    `integrations/${product.integration_id}`
+    `integrations/${product.integration_id}`,
+    {
+      headers: {
+        token: product.account_id,
+      },
+    }
   )
+
   const bling = blingApi(integration.access_token)
 
   let blingProduct = null
@@ -322,7 +329,9 @@ export const getServerSideProps = withSSRAuth<{
     })
     const [{ produto: produtoBling }] = produtos
     blingProduct = produtoBling
-  } catch (error) {}
+  } catch (error) {
+    console.error(error)
+  }
 
   return {
     props: {
