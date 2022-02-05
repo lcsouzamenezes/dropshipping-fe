@@ -233,15 +233,17 @@ export default function UserList() {
                     </Td>
                     {isWideVersion && <Td>{user.createdAt}</Td>}
                     <Td>
-                      {authenticatedUser && authenticatedUser.id !== user.id && (
-                        <Button
-                          size="sm"
-                          colorScheme="red"
-                          onClick={() => handleOpenDeleteModal(user)}
-                        >
-                          Deletar
-                        </Button>
-                      )}
+                      {data.users?.length > 1 &&
+                        authenticatedUser &&
+                        authenticatedUser.id !== user.id && (
+                          <Button
+                            size="sm"
+                            colorScheme="red"
+                            onClick={() => handleOpenDeleteModal(user)}
+                          >
+                            Deletar
+                          </Button>
+                        )}
                     </Td>
                   </Tr>
                 ))}
