@@ -159,7 +159,7 @@ export default function SignIn() {
           Entrar
         </Button>
         <Stack direction="row" justify="space-between">
-          <Link href="/register" passHref>
+          <Link href="/password/recovery" passHref>
             <ChakraLink as="a" fontSize="sm">
               Esqueceu a senha?
             </ChakraLink>
