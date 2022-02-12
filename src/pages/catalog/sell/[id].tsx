@@ -281,12 +281,16 @@ export default function SellItem({ product }: SellItemsProps) {
 
         router.push('/listings')
       } catch (error) {
+        let description = 'Por favor tente novamente.'
+        if (error.response?.data.code === 'create_listing:code_exists') {
+          description = 'Anúncio já cadastrado'
+        }
         toast({
           status: 'error',
           variant: 'solid',
           position: 'top',
           title: 'Falha ao cadastrar produto.',
-          description: 'Por favor tente novamente.',
+          description,
         })
       }
     }
