@@ -1,9 +1,10 @@
 import { useQuery } from 'react-query'
 import { api } from '../apiClient'
 
-interface Supplier {
+export interface Supplier {
   id: string
   name: string
+  logo?: string
 }
 
 interface GetSuppliersResponse {
