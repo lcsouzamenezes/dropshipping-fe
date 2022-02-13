@@ -80,7 +80,7 @@ export function setupAPIClient(ctx = undefined) {
               })
             })
           }
-        } else {
+        } else if (!error.response) {
           return Promise.reject(new AuthTokenError())
         }
       }
