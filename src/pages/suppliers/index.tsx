@@ -55,10 +55,10 @@ export default function SuppliersPage() {
     }
   }, [suppliersAuthorizations.data])
 
-  async function onRequestAuthorization(supplier_id: string): Promise<void> {
+  async function onRequestAuthorization(supplier: Supplier): Promise<void> {
     try {
       const response = await api.post(
-        `/suppliers/${supplier_id}/request/authorization`
+        `/suppliers/${supplier.id}/request/authorization`
       )
       toast({
         position: 'top',
@@ -67,6 +67,7 @@ export default function SuppliersPage() {
         status: 'success',
         title: 'Acesso solicitado com successo',
       })
+      setRequested({ ...requested, [supplier.id]: supplier })
     } catch (err) {
       if (err.response) {
         switch (err.response.data.code) {
@@ -147,7 +148,7 @@ export default function SuppliersPage() {
           </Box>
           <Stack>
             <Button
-              onClick={() => onRequestAuthorization(supplier.id)}
+              onClick={() => onRequestAuthorization(supplier)}
               type="button"
               w="100%"
               mt="auto"
