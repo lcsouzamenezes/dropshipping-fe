@@ -1,6 +1,8 @@
 import Layout from '@/components/Layout'
 import { SkeletonImage } from '@/components/Skeleton/SkeletonImage'
+import { api } from '@/services/api/apiClient'
 import { Supplier, useSuppliers } from '@/services/api/hooks/useSuppliers'
+import { useSuppliersAuthorizations } from '@/services/api/hooks/useSuppliersAuthorizations'
 import {
   Box,
   Flex,
@@ -13,16 +15,93 @@ import {
   SimpleGrid,
   Button,
   Stack,
+  useToast,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { withSSRAuth } from 'utils/withSSRAuth'
 
 export default function SuppliersPage() {
   const [page, setPage] = useState(1)
   const [perPage, SetPerPage] = useState(20)
+  const toast = useToast()
+  const [authorized, setAuthorized] = useState({})
+  const [requested, setRequested] = useState({})
   const { isFetching, isLoading, error, data } = useSuppliers(page, perPage)
+  const suppliersAuthorizations = useSuppliersAuthorizations()
+
+  useEffect(() => {
+    if (suppliersAuthorizations.data) {
+      let authorized = suppliersAuthorizations.data.reduce(
+        (acc, supplierAuthorization) => {
+          if (supplierAuthorization.authorized) {
+            acc[supplierAuthorization.supplier_id] = supplierAuthorization
+          }
+          return acc
+        },
+        {}
+      )
+      setAuthorized(authorized)
+
+      let requested = suppliersAuthorizations.data.reduce(
+        (acc, supplierAuthorization) => {
+          acc[supplierAuthorization.supplier_id] = supplierAuthorization
+          return acc
+        },
+        {}
+      )
+      setRequested(requested)
+    }
+  }, [suppliersAuthorizations.data])
+
+  async function onRequestAuthorization(supplier_id: string): Promise<void> {
+    try {
+      const response = await api.post(
+        `/suppliers/${supplier_id}/request/authorization`
+      )
+      toast({
+        position: 'top',
+        isClosable: false,
+        variant: 'solid',
+        status: 'success',
+        title: 'Acesso solicitado com successo',
+      })
+    } catch (err) {
+      if (err.response) {
+        switch (err.response.data.code) {
+          case 'request_authorization:authorization_already_requested':
+            toast({
+              position: 'top',
+              variant: 'solid',
+              status: 'error',
+              title: 'Solicitação falhou',
+              description: 'Você já enviou solicitação para esse fornecedor.',
+            })
+            break
+
+          default:
+            toast({
+              position: 'top',
+              variant: 'solid',
+              status: 'error',
+              title: 'Solicitação falhou',
+              description: 'A solicitação não pode ser enviada.',
+            })
+            break
+        }
+      } else {
+        console.error(err)
+        toast({
+          position: 'top',
+          variant: 'solid',
+          status: 'error',
+          title: 'Falha na Requisição',
+          description: 'Houve uma falha desconhecida.',
+        })
+      }
+    }
+  }
 
   function renderSupplier(supplier: Supplier) {
     return (
@@ -67,16 +146,19 @@ export default function SuppliersPage() {
             {supplier.name}
           </Box>
           <Stack>
-            <Link href={`/supplier/${supplier.id}/request-access`} passHref>
-              <Button as="a" w="100%" mt="auto" disabled colorScheme="brand">
-                Solicitar Acesso
-              </Button>
-            </Link>
-            <Link href={`/supplier/${supplier.id}/products`} passHref>
-              <Button as="a" w="100%" mt="auto" disabled colorScheme="gray">
-                Ver Produtos
-              </Button>
-            </Link>
+            <Button
+              onClick={() => onRequestAuthorization(supplier.id)}
+              type="button"
+              w="100%"
+              mt="auto"
+              colorScheme="brand"
+              disabled={!!requested[supplier.id]}
+              isLoading={suppliersAuthorizations.isFetching}
+            >
+              {!!requested[supplier.id]
+                ? 'Aguardando Aprovação'
+                : 'Solicitar Acesso'}
+            </Button>
           </Stack>
         </Flex>
       </Flex>
