@@ -147,19 +147,31 @@ export default function SuppliersPage() {
             {supplier.name}
           </Box>
           <Stack>
-            <Button
-              onClick={() => onRequestAuthorization(supplier)}
-              type="button"
-              w="100%"
-              mt="auto"
-              colorScheme="brand"
-              disabled={!!requested[supplier.id]}
-              isLoading={suppliersAuthorizations.isFetching}
-            >
-              {!!requested[supplier.id]
-                ? 'Aguardando Aprovação'
-                : 'Solicitar Acesso'}
-            </Button>
+            {!!authorized[supplier.id] ? (
+              <Button
+                type="button"
+                w="100%"
+                mt="auto"
+                colorScheme="green"
+                disabled
+              >
+                Aprovado
+              </Button>
+            ) : (
+              <Button
+                onClick={() => onRequestAuthorization(supplier)}
+                type="button"
+                w="100%"
+                mt="auto"
+                colorScheme="brand"
+                disabled={!!requested[supplier.id]}
+                isLoading={suppliersAuthorizations.isFetching}
+              >
+                {!!requested[supplier.id]
+                  ? 'Aguardando Aprovação'
+                  : 'Solicitar Acesso'}
+              </Button>
+            )}
           </Stack>
         </Flex>
       </Flex>
