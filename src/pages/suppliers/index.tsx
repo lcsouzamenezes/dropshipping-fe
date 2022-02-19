@@ -1,5 +1,6 @@
 import Layout from '@/components/Layout'
 import { SkeletonImage } from '@/components/Skeleton/SkeletonImage'
+import { setupAPIClient } from '@/services/api/api'
 import { api } from '@/services/api/apiClient'
 import { Supplier, useSuppliers } from '@/services/api/hooks/useSuppliers'
 import { useSuppliersAuthorizations } from '@/services/api/hooks/useSuppliersAuthorizations'
@@ -8,21 +9,33 @@ import {
   Flex,
   Heading,
   Spinner,
-  Text,
   Image,
-  WrapItem,
-  Avatar,
   SimpleGrid,
   Button,
   Stack,
   useToast,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  Icon,
+  Text,
+  AlertDescription,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { RiLinksLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
 
-export default function SuppliersPage() {
+interface SuppliersPageProps {
+  profile: {
+    profile: {
+      id: string
+    }
+  } | null
+}
+
+export default function SuppliersPage(props: SuppliersPageProps) {
   const [page, setPage] = useState(1)
   const [perPage, SetPerPage] = useState(20)
   const toast = useToast()
@@ -36,7 +49,7 @@ export default function SuppliersPage() {
       let authorized = suppliersAuthorizations.data.reduce(
         (acc, supplierAuthorization) => {
           if (supplierAuthorization.authorized) {
-            acc[supplierAuthorization.supplier_id] = supplierAuthorization
+            acc[supplierAuthorization.supplier.id] = supplierAuthorization
           }
           return acc
         },
@@ -46,7 +59,7 @@ export default function SuppliersPage() {
 
       let requested = suppliersAuthorizations.data.reduce(
         (acc, supplierAuthorization) => {
-          acc[supplierAuthorization.supplier_id] = supplierAuthorization
+          acc[supplierAuthorization.supplier.id] = supplierAuthorization
           return acc
         },
         {}
@@ -199,9 +212,46 @@ export default function SuppliersPage() {
         </Flex>
         <Flex align="center">
           <Box className="panel" flex="1" p={['6', '8']}>
-            <SimpleGrid columns={[1, 2, 3, 4]} spacing={6}>
-              {data?.suppliers.map((supplier) => renderSupplier(supplier))}
-            </SimpleGrid>
+            {!props.profile?.profile?.id ? (
+              <Alert
+                status="warning"
+                variant="subtle"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                textAlign="center"
+              >
+                <AlertIcon boxSize="40px" mr={0} />
+                <AlertTitle mt={4} mb={1} fontSize="lg">
+                  Perfil Incompleto
+                </AlertTitle>
+                <AlertDescription maxWidth="md">
+                  <Text>
+                    Por favor preencha completamente seu perfil para ter acesso
+                    aos fornecedores. Esse passo é necessário para que o
+                    fornecedor possa identificar seus dados e autorizar o acesso
+                    ao catalogo de produtos rapidamente
+                  </Text>
+                  <Link href="/profile" passHref>
+                    <Button as="a" mt={4} colorScheme="brand">
+                      Ir para Perfil
+                    </Button>
+                  </Link>
+                </AlertDescription>
+              </Alert>
+            ) : (
+              // <Link href="profile" passHref>
+              //   <Alert as="a" status="warning" mb="2" borderRadius="base">
+              //     <AlertIcon />
+              //     <AlertTitle>Perfil incompleto:</AlertTitle>
+              //     Por favor preencha todos os seus dados para que os
+              //     fornecedores consigam aprovar sua requisição rapidamente
+              //   </Alert>
+              // </Link>
+              <SimpleGrid columns={[1, 2, 3, 4]} spacing={6}>
+                {data?.suppliers.map((supplier) => renderSupplier(supplier))}
+              </SimpleGrid>
+            )}
           </Box>
         </Flex>
       </Box>
@@ -211,9 +261,19 @@ export default function SuppliersPage() {
 
 export const getServerSideProps = withSSRAuth(
   async (ctx) => {
+    const apiClient = setupAPIClient(ctx)
+
+    let profile = null
+    try {
+      const { data } = await apiClient.get(`/profiles`)
+      profile = data
+    } catch (error) {}
+
+    // const response = await apiClient.get('users/me');
     return {
       props: {
         cookies: ctx.req.headers.cookie ?? '',
+        profile: profile,
       },
     }
   },
