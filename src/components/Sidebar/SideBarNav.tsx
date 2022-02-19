@@ -9,6 +9,7 @@ import {
   RiLineChartLine,
   RiPlugLine,
   RiPriceTag3Line,
+  RiTeamLine,
 } from 'react-icons/ri'
 import { NavLink } from './NavLink'
 import { NavSection } from './NavSection'
@@ -23,9 +24,14 @@ export function SideBarNave() {
         {useCan({
           roles: ['supplier'],
         }) && (
-          <NavLink icon={RiPriceTag3Line} href="/products">
-            Produtos
-          </NavLink>
+          <>
+            <NavLink icon={RiPriceTag3Line} href="/products">
+              Produtos
+            </NavLink>
+            <NavLink icon={RiTeamLine} href="/sellers">
+              Vendedores
+            </NavLink>
+          </>
         )}
         {useCan({
           roles: ['seller'],
