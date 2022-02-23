@@ -44,12 +44,11 @@ export interface SupplierAuthorizations {
 
 async function getSuppliersAuthorizations(
   page?: number,
-  perPage?: number,
-  search?: string
+  perPage?: number
 ): Promise<SupplierAuthorizations[]> {
   const { data } = await api.get<SupplierAuthorizations[]>(
     'suppliers/authotization-requests',
-    { params: { page, perPage, search } }
+    { params: { page, perPage } }
   )
 
   const formatedData = data.map((authorization) => {
@@ -69,14 +68,10 @@ async function getSuppliersAuthorizations(
   return formatedData
 }
 
-export function useSuppliersAuthorizations(
-  page?: number,
-  perPage?: number,
-  search?: string
-) {
+export function useSuppliersAuthorizations(page?: number, perPage?: number) {
   return useQuery(
     ['suppliersAuthorizations'],
-    async () => await getSuppliersAuthorizations(page, perPage, search),
+    async () => await getSuppliersAuthorizations(page, perPage),
     {
       staleTime: 1000 * 60 * 5, //5 minutes
     }

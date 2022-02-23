@@ -36,6 +36,7 @@ import { useSuppliers } from '@/services/api/hooks/useSuppliers'
 import _ from 'lodash'
 import { useRouter } from 'next/router'
 import { withSSRAuth } from 'utils/withSSRAuth'
+import { useSuppliersAuthorizations } from '@/services/api/hooks/useSuppliersAuthorizations'
 
 interface Product {
   id: string
@@ -74,6 +75,7 @@ export default function Catalog(props: CatalogProps) {
   const [perPage, setPerPage] = useState(props.query.perPage ?? 20)
   const [search, setSearch] = useState<string>(props.query.search)
   const [supplier, setSupplier] = useState<string>(props.query.supplier)
+  const suppliersAuthorizations = useSuppliersAuthorizations()
   const [products, setProducts] = useState<ProductFormated[]>([])
 
   const {
@@ -332,13 +334,22 @@ export default function Catalog(props: CatalogProps) {
               onChange={(e) => setSupplier(e.target.value)}
               isDisabled={isLoadingSuppliers}
             >
-              {!errorSuppliers &&
-                !isLoading &&
-                suppliersData.suppliers.map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </option>
-                ))}
+              {!suppliersAuthorizations.error &&
+                !suppliersAuthorizations.isLoading &&
+                suppliersAuthorizations.data.map((supplierAuthorization) => {
+                  return (
+                    <>
+                      {supplierAuthorization.authorized && (
+                        <option
+                          key={supplierAuthorization.supplier.id}
+                          value={supplierAuthorization.supplier.id}
+                        >
+                          {supplierAuthorization.supplier.name}
+                        </option>
+                      )}
+                    </>
+                  )
+                })}
             </Select>
           </Flex>
         </Stack>
