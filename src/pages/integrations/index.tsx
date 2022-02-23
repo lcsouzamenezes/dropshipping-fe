@@ -16,6 +16,8 @@ import {
   Td,
   Spinner,
   Link as ChakraLink,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react'
 
 import { Header } from '../../components/Header'
@@ -54,36 +56,48 @@ export default function Integrations() {
               <Text>Falha ao obter dados.</Text>
             ) : (
               <>
-                <Table>
-                  <Thead>
-                    <Tr>
-                      <Th>Nome</Th>
-                      <Th>Tipo</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {data.map(({ id, name, type }) => {
-                      return (
-                        <Tr key={id}>
-                          <Td>
-                            {type === 'Bling' ? (
-                              <Link href={`/integrations/bling/${id}`} passHref>
-                                <ChakraLink color="brand.500">
-                                  <Text fontWeight="bold">{name}</Text>
-                                </ChakraLink>
-                              </Link>
-                            ) : (
-                              <Text fontWeight="bold">{name}</Text>
-                            )}
-                          </Td>
-                          <Td>{type}</Td>
-                          <Td></Td>
-                        </Tr>
-                      )
-                    })}
-                  </Tbody>
-                </Table>
+                {!!data.length ? (
+                  <Table>
+                    <Thead>
+                      <Tr>
+                        <Th>Nome</Th>
+                        <Th>Tipo</Th>
+                        <Th></Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {data.map(({ id, name, type }) => {
+                        return (
+                          <Tr key={id}>
+                            <Td>
+                              {type === 'Bling' ? (
+                                <Link
+                                  href={`/integrations/bling/${id}`}
+                                  passHref
+                                >
+                                  <ChakraLink color="brand.500">
+                                    <Text fontWeight="bold">{name}</Text>
+                                  </ChakraLink>
+                                </Link>
+                              ) : (
+                                <Text fontWeight="bold">{name}</Text>
+                              )}
+                            </Td>
+                            <Td>{type}</Td>
+                            <Td></Td>
+                          </Tr>
+                        )
+                      })}
+                    </Tbody>
+                  </Table>
+                ) : (
+                  <Flex w="full" p={2}>
+                    <Alert status="info" display="flex" justifyContent="center">
+                      <AlertIcon />
+                      Nenhum dado encontrado.
+                    </Alert>
+                  </Flex>
+                )}
               </>
             )}
           </Flex>
