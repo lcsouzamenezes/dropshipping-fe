@@ -20,6 +20,7 @@ import {
   Icon,
   Text,
   AlertDescription,
+  Badge,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -129,6 +130,17 @@ export default function SuppliersPage(props: SuppliersPageProps) {
         direction="column"
       >
         <Flex w="100%" pb="100%" position="relative" bgColor="white">
+          {supplier.address && (
+            <Badge
+              colorScheme="brand"
+              pos="absolute"
+              right={2}
+              bottom={2}
+              zIndex={2}
+            >
+              {supplier.address.city} / {supplier.address.state}
+            </Badge>
+          )}
           {supplier.logo ? (
             <SkeletonImage
               src={supplier.logo}
@@ -147,7 +159,12 @@ export default function SuppliersPage(props: SuppliersPageProps) {
             />
           )}
         </Flex>
-        <Flex p={4} direction="column" height="100%">
+        <Flex
+          p={4}
+          direction="column"
+          justifyContent="space-between"
+          height="100%"
+        >
           <Box
             fontWeight="semibold"
             as="h4"
@@ -240,14 +257,6 @@ export default function SuppliersPage(props: SuppliersPageProps) {
                 </AlertDescription>
               </Alert>
             ) : (
-              // <Link href="profile" passHref>
-              //   <Alert as="a" status="warning" mb="2" borderRadius="base">
-              //     <AlertIcon />
-              //     <AlertTitle>Perfil incompleto:</AlertTitle>
-              //     Por favor preencha todos os seus dados para que os
-              //     fornecedores consigam aprovar sua requisição rapidamente
-              //   </Alert>
-              // </Link>
               <SimpleGrid columns={[1, 2, 3, 4]} spacing={6}>
                 {data?.suppliers.map((supplier) => renderSupplier(supplier))}
               </SimpleGrid>

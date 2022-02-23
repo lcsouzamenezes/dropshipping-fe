@@ -5,6 +5,17 @@ export interface Supplier {
   id: string
   name: string
   logo?: string
+  address?: {
+    id: string
+    address: string
+    address_2: string
+    city: string
+    district: string
+    identifier: string
+    number: string
+    state: string
+    zip: string
+  }
 }
 
 interface GetSuppliersResponse {
@@ -30,6 +41,8 @@ async function getSuppliers(
       ({
         id: supplier.id,
         name: supplier.name,
+        logo: supplier.logo,
+        address: supplier.address,
       } as Supplier)
   )
 
