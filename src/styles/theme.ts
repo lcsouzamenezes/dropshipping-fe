@@ -16,7 +16,7 @@ const themeDetails = {
         borderRadius: '8',
       },
       'a.active': {
-        color: 'brand.500',
+        color: props.colorMode === 'light' ? 'brand.500' : 'brand.300',
       },
       '&::-webkit-scrollbar': {
         width: '2',

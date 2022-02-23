@@ -24,6 +24,7 @@ import {
   Stack,
   InputRightElement,
   AlertIcon,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -242,21 +243,19 @@ export default function Catalog(props: CatalogProps) {
               Bem vindo ao Catálogo
             </AlertTitle>
             <AlertDescription maxWidth="md">
-              Nenhum produto disponível até o momento. Aguarde até novos
-              fornecedores entrarem em nossa plataforma.
-              {/*Nenhum produto disponível até o momento. Peça autorização para um
-              fornecedor para ter acesso aos seus produtos.
-               <Link href="/suppliers" passHref>
-                <Button
+              Nenhum produto disponível até o momento. Aguarde até os
+              fornecedores aprovarem sua solicitação de acesso. Voce pode velas
+              em{' '}
+              <Link href="/suppliers" passHref>
+                <ChakraLink
                   as="a"
-                  leftIcon={<Icon as={RiExternalLinkLine} />}
-                  variant="solid"
-                  colorScheme="blue"
-                  mt={2}
+                  fontWeight="bold"
+                  textDecor="underline"
+                  color={useColorModeValue('brand.500', 'brand.500')}
                 >
                   Fornecedores
-                </Button>
-              </Link> */}
+                </ChakraLink>
+              </Link>
             </AlertDescription>
           </>
         ) : (
