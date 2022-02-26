@@ -20,6 +20,7 @@ export interface SupplierAuthorizations {
       is_company: boolean
       created_at: Date
       updated_at: Date
+      mobile_number: string
       address: {
         id: string
         address: string

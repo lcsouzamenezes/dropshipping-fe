@@ -192,6 +192,18 @@ export default function SellersPage() {
                     </Text>{' '}
                     {selectedSupplierAuthorization.account.user.name}
                   </ListItem>
+                  {selectedSupplierAuthorization.account.profile
+                    .mobile_number && (
+                    <ListItem>
+                      <Text as={'span'} fontWeight={'bold'}>
+                        Celular:
+                      </Text>{' '}
+                      {selectedSupplierAuthorization.account.profile.mobile_number.replace(
+                        /^(\d{2})(\d{5})(\d.+)/g,
+                        '($1) $2-$3'
+                      )}
+                    </ListItem>
+                  )}
                   <ListItem>
                     <Text as={'span'} fontWeight={'bold'}>
                       E-mail:

@@ -61,7 +61,7 @@ export function Profile({ showProfileDetails = true }: ProfileProps) {
           onClick={() => router.push('/profile')}
           icon={<Icon as={RiProfileLine} fontSize="18" color="brand.500" />}
         >
-          Profile
+          Perfil
         </MenuItem>
         <MenuItem
           onClick={signOut}
