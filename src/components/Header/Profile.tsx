@@ -67,7 +67,7 @@ export function Profile({ showProfileDetails = true }: ProfileProps) {
           onClick={signOut}
           icon={<Icon as={RiLogoutBoxLine} fontSize="18" color="brand.500" />}
         >
-          Logout
+          Sair
         </MenuItem>
       </MenuList>
     </Menu>

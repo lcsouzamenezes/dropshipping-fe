@@ -63,7 +63,7 @@ const options = {
 const series = [
   {
     name: 'Vendas',
-    data: [0, 0, 10, 0, 15, 0],
+    data: [0, 0, 0, 0, 0, 0],
   },
 ]
 
