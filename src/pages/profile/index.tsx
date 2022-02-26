@@ -38,6 +38,7 @@ interface GetProfile {
     state_subscription_number?: number
     city_subscription_number?: number
     is_main: boolean
+    mobile_number: number
   }
   address: {
     id: string
@@ -67,6 +68,7 @@ interface ProfileFormData {
   address: string
   address_2: string
   number: string
+  mobile_number: string
 }
 
 const states = [
@@ -213,6 +215,7 @@ export default function ProfilePage() {
     address: yup.string().required('Endereço obrigatório'),
     address_2: yup.string().optional(),
     number: yup.string().required('Número obrigatório'),
+    mobile_number: yup.string().required('Celular obrigatório'),
   })
 
   const {
@@ -250,7 +253,7 @@ export default function ProfilePage() {
             'document',
             String(data.profile.document_number).replace(
               /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g,
-              '$1.$2.$3/$4-$5'
+              '$1.$2.$3-$4/$5'
             )
           )
         } else {
@@ -262,6 +265,15 @@ export default function ProfilePage() {
             )
           )
         }
+        setValue(
+          'mobile_number',
+          data.profile.mobile_number
+            ? String(data.profile.mobile_number).replace(
+                /^(\d{2})(\d{5})(\d.+)/g,
+                '($1) $2-$3'
+              )
+            : ''
+        )
         setValue(
           'state_subscription_number',
           data.profile.state_subscription_number
@@ -373,7 +385,8 @@ export default function ProfilePage() {
 
       const response = await api.post('profiles', {
         ...data,
-        document: Number(data.document.replaceAll(/\D/g, '')),
+        document: String(data.document.replaceAll(/\D/g, '')),
+        mobile_number: Number(data.mobile_number.replaceAll(/\D/g, '')),
         zip: Number(data.zip.replaceAll(/\D/g, '')),
         state_subscription_number:
           data.state_subscription_number &&
@@ -389,9 +402,12 @@ export default function ProfilePage() {
         position: 'top',
         title: 'Dados atualizados com successo',
       })
-    } catch (error) {
+    } catch (err) {
       toast({
-        description: JSON.stringify(error),
+        status: 'error',
+        variant: 'solid',
+        position: 'top',
+        title: 'Houve uma falha na requisição, tente novamente mais tarde',
       })
     }
   }
@@ -439,7 +455,11 @@ export default function ProfilePage() {
             />
             <Input
               name="nickname"
-              label="Nome Fantasia / Apelido"
+              label={
+                shouldRenderCompanyFields({ control })
+                  ? 'Nome Fantasia'
+                  : 'Apelido'
+              }
               type="text"
               error={errors.nickname}
             />
@@ -456,7 +476,7 @@ export default function ProfilePage() {
             </Select>
             <Input
               name="document"
-              label="CNPJ/CPF"
+              label={shouldRenderCompanyFields({ control }) ? 'CNPJ' : 'CPF'}
               type="text"
               mask={
                 shouldRenderCompanyFields({ control })
@@ -466,6 +486,15 @@ export default function ProfilePage() {
               showRequiredLabel
               {...register('document')}
               error={errors.document}
+            />
+            <Input
+              name="mobile_number"
+              label="Celular"
+              type="text"
+              mask={'(99) 99999-9999'}
+              showRequiredLabel
+              {...register('mobile_number')}
+              error={errors.mobile_number}
             />
           </SimpleGrid>
           {shouldRenderCompanyFields({ control }) && (
