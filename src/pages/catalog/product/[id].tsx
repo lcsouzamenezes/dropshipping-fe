@@ -118,7 +118,7 @@ export default function DetailedProductPage({
           align="center"
           direction={['column', 'column', 'column', 'row']}
         >
-          <Heading>Produto Detallhado</Heading>
+          <Heading>Produto Detalhado</Heading>
           <Box>
             <Link href="/catalog" passHref>
               <Button as="a" colorScheme="gray">
