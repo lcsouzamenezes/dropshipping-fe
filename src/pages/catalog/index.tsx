@@ -171,7 +171,8 @@ export default function Catalog(props: CatalogProps) {
               fontSize="xs"
               textTransform="uppercase"
             >
-              {0} vendas &bull; {product.stock} em estoque
+              {/* {0} vendas &bull; {product.stock} em estoque */}
+              {product.stock} em estoque
             </Box>
           </Box>
           <Box
@@ -248,7 +249,7 @@ export default function Catalog(props: CatalogProps) {
               Nenhum produto disponível até o momento. Aguarde até os
               fornecedores aprovarem sua solicitação de acesso. Voce pode velas
               em{' '}
-              <Link href="/suppliers" passHref>
+              <Link href="#" passHref>
                 <ChakraLink
                   as="a"
                   fontWeight="bold"
