@@ -115,7 +115,7 @@ export default function ListingsPage() {
       <Box flex="1" className="panel" p="8">
         <Flex mb="8" justify="space-between" align="center">
           <Heading size="lg" fontWeight="normal">
-            Produtos Anúnciados
+            Produtos Anunciados
             {isFetching && !isLoading && (
               <Spinner color="gray.500" size="sm" ml="4" />
             )}
