@@ -249,7 +249,7 @@ export default function Catalog(props: CatalogProps) {
               Nenhum produto disponível até o momento. Aguarde até os
               fornecedores aprovarem sua solicitação de acesso. Voce pode velas
               em{' '}
-              <Link href="/suppliers" passHref>
+              <Link href="#" passHref>
                 <ChakraLink
                   as="a"
                   fontWeight="bold"
