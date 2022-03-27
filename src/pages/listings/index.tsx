@@ -40,6 +40,7 @@ import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
 import Head from 'next/head'
 import { RiArrowRightLine } from 'react-icons/ri'
+import { Select } from '@/components/Form/Select'
 
 type Listing = {
   id: string
@@ -62,6 +63,7 @@ export default function ListingsPage() {
   const { isFetching, isLoading, error, data } = useListings(page, perPage)
 
   const [isOpen, setIsOpen] = useState(false)
+  const [newListenType, setNewListenType] = useState(null)
   const onClose = () => setIsOpen(false)
   const [isOpenCreateOpenModal, setIsOpenCreateOpenModal] = useState(false)
   const onCloseCreateModal = () => setIsOpenCreateOpenModal(false)
@@ -251,26 +253,31 @@ export default function ListingsPage() {
 
             <AlertDialogBody>
               Selecione o tipo de anúncio que deseja criar?
+              <Select
+                onChange={(e) => setNewListenType(e.target.value)}
+                value={newListenType}
+                placeholder="Selecione o tipo de anúncio"
+                name="type"
+              >
+                <option value="simple">Simples</option>
+                <option value="compose">Combo</option>
+              </Select>
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button
-                ref={cancelRefCreateModal}
-                onClick={() => {
-                  setDeletingListing(null)
-                  onCloseCreateModal()
-                }}
-              >
+              <Button ref={cancelRefCreateModal} onClick={onCloseCreateModal}>
                 Cancelar
               </Button>
-              <Button
-                colorScheme="brand"
-                onClick={() => handleClickDeleteModalButton()}
-                ml={3}
-                isLoading={isDeleting}
-              >
-                Deletar
-              </Button>
+              <Link href={`/listings/new/${newListenType}`} passHref>
+                <Button
+                  as="a"
+                  colorScheme="brand"
+                  ml={3}
+                  disabled={!newListenType}
+                >
+                  Selecionar
+                </Button>
+              </Link>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>
