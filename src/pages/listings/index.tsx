@@ -63,7 +63,10 @@ export default function ListingsPage() {
 
   const [isOpen, setIsOpen] = useState(false)
   const onClose = () => setIsOpen(false)
+  const [isOpenCreateOpenModal, setIsOpenCreateOpenModal] = useState(false)
+  const onCloseCreateModal = () => setIsOpenCreateOpenModal(false)
   const cancelRef = useRef()
+  const cancelRefCreateModal = useRef()
 
   const deleteListing = useMutation<void, AxiosError>(
     async () => {
@@ -79,6 +82,10 @@ export default function ListingsPage() {
   function handleOpenDeleteModal(listing: Listing) {
     setDeletingListing(listing)
     setIsOpen(true)
+  }
+
+  function openNewListingModal() {
+    setIsOpenCreateOpenModal(true)
   }
 
   async function handleClickDeleteModalButton() {
@@ -127,12 +134,15 @@ export default function ListingsPage() {
                 Ver Catalogo
               </Button>
             </Link>
-            <Link href="/catalog" passHref>
-              <Button as="a" size="sm" fontSize="sm" colorScheme="brand">
-                <Icon as={RiAddLine} fontSize={20} mr="1" />
-                Criar
-              </Button>
-            </Link>
+            <Button
+              onClick={openNewListingModal}
+              size="sm"
+              fontSize="sm"
+              colorScheme="brand"
+            >
+              <Icon as={RiAddLine} fontSize={20} mr="1" />
+              Criar
+            </Button>
           </Stack>
         </Flex>
         {isLoading ? (
@@ -227,6 +237,44 @@ export default function ListingsPage() {
           </>
         )}
       </Box>
+
+      <AlertDialog
+        isOpen={isOpenCreateOpenModal}
+        leastDestructiveRef={cancelRefCreateModal}
+        onClose={onCloseCreateModal}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Criar novo anúncio
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Selecione o tipo de anúncio que deseja criar?
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRefCreateModal}
+                onClick={() => {
+                  setDeletingListing(null)
+                  onCloseCreateModal()
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                colorScheme="brand"
+                onClick={() => handleClickDeleteModalButton()}
+                ml={3}
+                isLoading={isDeleting}
+              >
+                Deletar
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
 
       {deletingListing && (
         <AlertDialog
