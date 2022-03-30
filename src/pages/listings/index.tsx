@@ -252,8 +252,8 @@ export default function ListingsPage() {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Selecione o tipo de anúncio que deseja criar?
               <Select
+                label="Selecione o tipo de anúncio que deseja criar"
                 onChange={(e) => setNewListenType(e.target.value)}
                 value={newListenType}
                 placeholder="Selecione o tipo de anúncio"
