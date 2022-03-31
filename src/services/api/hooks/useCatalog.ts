@@ -46,7 +46,7 @@ export interface GetCatalogResponse {
   totalCount: number
 }
 
-export const getCatalog = async (
+const getCatalog = async (
   page: number,
   perPage: number = 12,
   search: string,

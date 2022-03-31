@@ -1,26 +1,34 @@
+import { Checkbox } from '@/components/Form/Checkbox'
 import { Input } from '@/components/Form/Input'
 import { Select } from '@/components/Form/Select'
 import Layout from '@/components/Layout'
-import {
-  getCatalog,
-  ProductFormated,
-  useCatalog,
-} from '@/services/api/hooks/useCatalog'
+import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
 import { Supplier, useSuppliers } from '@/services/api/hooks/useSuppliers'
 import {
+  Alert,
+  AlertIcon,
   Box,
+  Button,
   Flex,
   FormLabel,
   Heading,
+  Icon,
   Image,
+  InputLeftElement,
   Spinner,
   Stack,
   Text,
   useColorModeValue as mode,
 } from '@chakra-ui/react'
+import _ from 'lodash'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  RiArrowLeftCircleLine,
+  RiArrowRightCircleLine,
+  RiSearchLine,
+} from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
 
 export default function NewPage() {
@@ -31,60 +39,93 @@ export default function NewPage() {
 
   const router = useRouter()
   const type = router.query.type as string
-  const { data, isLoading, error } = useSuppliers()
+  const {
+    data: suppliersData,
+    isLoading: isLoadingSuppliers,
+    error: suppliersError,
+  } = useSuppliers()
   const [selectedSupplier, setSelectedSupplier] = useState('')
-  const [products, setProducts] = useState<ProductFormated[]>([])
+  const [selectedProcuts, setSelectedProducts] = useState({})
   const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(20)
+  const [totalPages, setTotalPages] = useState(1)
+  const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    setProducts([])
-    if (!!selectedSupplier) {
-      const fetchCatalog = async () => {
-        const { products, totalCount } = await getCatalog(
-          page,
-          100,
-          search,
-          selectedSupplier
-        )
-        setProducts(products)
-      }
-      fetchCatalog().catch((err) => console.log(err))
-    }
-  }, [selectedSupplier])
+  const updateSearch = useCallback(
+    _.debounce((searchInput) => {
+      setPage(1)
+      setSearch(searchInput)
+    }, 300),
+    []
+  )
 
-  function renderProduct(product: ProductFormated) {
+  const {
+    data: catalogData,
+    isLoading: isLoadingCatalogSuppliers,
+    error: catalogError,
+  } = useCatalog(page, perPage, search, selectedSupplier)
+
+  useEffect(() => {
+    updateSearch(searchInput)
+  }, [searchInput])
+
+  useEffect(() => {
+    if (catalogData?.totalCount) {
+      setTotalPages(Math.ceil(catalogData.totalCount / perPage))
+    }
+  }, [catalogData])
+
+  const renderProduct = (product: ProductFormated) => {
     return (
       <Stack key={product.id} direction="row" spacing="5" width="full">
-        <Image
-          rounded="lg"
-          width="120px"
-          height="120px"
-          fit="cover"
-          src={
-            product.images[0]
-              ? product.images[0].url
-              : '/assets/images/default-placeholder.png'
-          }
-          fallbackSrc="/assets/images/default-placeholder.png"
-          alt={product.name}
-          draggable="false"
-          loading="lazy"
-        />
-        <Box pt="4">
-          <Stack spacing="0.5">
-            <Text fontWeight="medium">{product.name}</Text>
-            <Text color={mode('gray.600', 'gray.400')} fontSize="sm">
-              {product.sku}
-            </Text>
-          </Stack>
-        </Box>
+        <Flex
+          _hover={{ borderColor: 'brand.500' }}
+          width="full"
+          border="2px"
+          borderColor="transparent"
+          rounded="md"
+          p={2}
+        >
+          <Checkbox
+            isChecked={selectedProcuts[product.id] || false}
+            onChange={() =>
+              setSelectedProducts({
+                ...selectedProcuts,
+                ...{ [product.id]: !selectedProcuts[product.id] },
+              })
+            }
+            colorScheme="brand"
+            name="product[]"
+            value={product.id}
+          >
+            <Flex alignItems="center">
+              <Image
+                rounded="lg"
+                width="100px"
+                height="100px"
+                fit="cover"
+                src={
+                  product.images[0]
+                    ? product.images[0].url
+                    : '/assets/images/default-placeholder.png'
+                }
+                fallbackSrc="/assets/images/default-placeholder.png"
+                alt={product.name}
+                draggable="false"
+                loading="lazy"
+              />
+              <Box pt="4" ml="2">
+                <Stack spacing="0.5">
+                  <Text fontWeight="medium">{product.name}</Text>
+                  <Text fontSize="sm">{product.sku}</Text>
+                </Stack>
+              </Box>
+            </Flex>
+          </Checkbox>
+        </Flex>
       </Stack>
     )
-  }
-
-  function renderProductsList() {
-    return <Stack>{products.map((product) => renderProduct(product))}</Stack>
   }
 
   return (
@@ -113,7 +154,7 @@ export default function NewPage() {
             >
               Fornecedor{' '}
               <Spinner
-                hidden={!isLoading}
+                hidden={!isLoadingSuppliers}
                 marginLeft="1"
                 size="sm"
                 color="brand.500"
@@ -124,18 +165,87 @@ export default function NewPage() {
               name="supplier"
               onChange={(e) => setSelectedSupplier(e.target.value)}
               value={selectedSupplier}
-              isDisabled={isLoading}
+              isDisabled={isLoadingSuppliers}
             >
-              {!isLoading &&
-                !error &&
-                data.suppliers.map((supplier) => (
+              {!isLoadingSuppliers &&
+                !suppliersError &&
+                suppliersData.suppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}
                   </option>
                 ))}
             </Select>
           </Box>
-          <Box>{renderProductsList()}</Box>
+          {!!selectedSupplier && (
+            <Stack>
+              <Input
+                leftElement={
+                  <InputLeftElement
+                    pointerEvents="none"
+                    color="gray.500"
+                    children={<Icon as={RiSearchLine} />}
+                  />
+                }
+                name="search"
+                placeholder="Buscar produto"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+
+              {isLoadingCatalogSuppliers ? (
+                <Flex justify="center" p={4}>
+                  <Spinner size="md" color="brand.500" />
+                </Flex>
+              ) : catalogError ? (
+                <Alert status="error">
+                  <AlertIcon />
+                  Falha ao obter dados
+                </Alert>
+              ) : catalogData && !catalogData.products.length ? (
+                <Alert status="info">
+                  <AlertIcon />
+                  Nenhum produto encontrado
+                </Alert>
+              ) : (
+                <Stack>
+                  {catalogData.products.map((product) =>
+                    renderProduct(product)
+                  )}
+                  {totalPages > 1 && (
+                    <Flex justifyContent="space-between">
+                      <Button
+                        isDisabled={page === 1}
+                        onClick={() => setPage(page - 1)}
+                        variant="ghost"
+                        rounded="full"
+                        colorScheme="brand"
+                      >
+                        <Icon mr={1} fontSize={24} as={RiArrowLeftCircleLine} />
+                        Anterior
+                      </Button>
+                      <Flex alignItems="center">
+                        {page}/{totalPages}
+                      </Flex>
+                      <Button
+                        onClick={() => setPage(page + 1)}
+                        isDisabled={page >= totalPages}
+                        variant="ghost"
+                        rounded="full"
+                        colorScheme="brand"
+                      >
+                        Próxima
+                        <Icon
+                          ml={1}
+                          fontSize={24}
+                          as={RiArrowRightCircleLine}
+                        />
+                      </Button>
+                    </Flex>
+                  )}
+                </Stack>
+              )}
+            </Stack>
+          )}
         </Stack>
       </Box>
     </Layout>
