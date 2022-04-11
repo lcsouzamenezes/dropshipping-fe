@@ -63,7 +63,7 @@ export default function ListingsPage() {
   const { isFetching, isLoading, error, data } = useListings(page, perPage)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [newListenType, setNewListenType] = useState(null)
+  const [newListenType, setNewListenType] = useState('')
   const onClose = () => setIsOpen(false)
   const [isOpenCreateOpenModal, setIsOpenCreateOpenModal] = useState(false)
   const onCloseCreateModal = () => setIsOpenCreateOpenModal(false)
