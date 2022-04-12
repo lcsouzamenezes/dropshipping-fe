@@ -28,6 +28,9 @@ import {
   Stack,
 } from '@chakra-ui/react'
 
+import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
+import Head from 'next/head'
+import Link from 'next/link'
 import Layout from '@/components/Layout'
 import { Checkbox } from '@/components/Form/Checkbox'
 import { useListings } from '@/services/api/hooks/useListings'
@@ -35,10 +38,7 @@ import { Pagination } from '@/components/Pagination'
 import { api } from '@/services/api/apiClient'
 import { queryClient } from '@/services/queryClient'
 import { useMutation } from 'react-query'
-import Link from 'next/link'
-import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
-import Head from 'next/head'
 import { RiArrowRightLine } from 'react-icons/ri'
 import { Select } from '@/components/Form/Select'
 
@@ -259,8 +259,12 @@ export default function ListingsPage() {
                 placeholder="Selecione o tipo de anúncio"
                 name="type"
               >
-                <option value="simple">Simples</option>
-                <option value="compose">Combo</option>
+                <option key="simple" value="simple">
+                  Simples
+                </option>
+                <option key="combo" value="compose">
+                  Combo
+                </option>
               </Select>
             </AlertDialogBody>
 

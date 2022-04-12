@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react'
 import _ from 'lodash'
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -143,6 +144,16 @@ export default function NewPage() {
           <Heading size="lg" fontWeight="normal">
             Criar novo anúncio "{typeMap[type]}"
           </Heading>
+          <Stack direction="row">
+            <Button
+              onClick={() => {}}
+              size="sm"
+              fontSize="sm"
+              colorScheme="brand"
+            >
+              Criar
+            </Button>
+          </Stack>
         </Flex>
         <Stack>
           <Box>
