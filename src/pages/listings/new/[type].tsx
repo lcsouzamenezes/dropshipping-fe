@@ -3,7 +3,9 @@ import { Input } from '@/components/Form/Input'
 import { Select } from '@/components/Form/Select'
 import Layout from '@/components/Layout'
 import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
-import { Supplier, useSuppliers } from '@/services/api/hooks/useSuppliers'
+import { useIngrations } from '@/services/api/hooks/useIntegrations'
+import { useSuppliers } from '@/services/api/hooks/useSuppliers'
+import { nextApi } from '@/services/api/nextApi'
 import {
   Alert,
   AlertIcon,
@@ -15,22 +17,56 @@ import {
   Icon,
   Image,
   InputLeftElement,
+  InputRightElement,
+  SimpleGrid,
   Spinner,
   Stack,
   Text,
-  useColorModeValue as mode,
+  useToast,
 } from '@chakra-ui/react'
+import { yupResolver } from '@hookform/resolvers/yup'
+import axios from 'axios'
 import _ from 'lodash'
 import Head from 'next/head'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
+import { MouseEventHandler, useCallback, useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import {
   RiArrowLeftCircleLine,
   RiArrowRightCircleLine,
   RiSearchLine,
 } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
+import * as yup from 'yup'
+
+interface MercadoLivreItem {
+  id: string
+  title: string
+  price: number
+  secure_thumbnail: string
+  permalink: string
+  variations: Array<{
+    id: number
+    price: number
+    attribute_combinations: Array<{
+      id: string
+      name: string
+      value_name: string
+    }>
+  }>
+}
+interface CreateComboSellingItemFormData {
+  mercadolivre_account: string
+  mercadolivre_item_url: string
+  mercadolivre_account_code: string
+}
+
+interface getItemAPIInterface {
+  status: boolean
+  item?: MercadoLivreItem
+  message?: string
+  code: string
+}
 
 export default function NewPage() {
   const typeMap = {
@@ -39,6 +75,7 @@ export default function NewPage() {
   }
 
   const router = useRouter()
+  const toast = useToast()
   const type = router.query.type as string
   const {
     data: suppliersData,
@@ -46,12 +83,37 @@ export default function NewPage() {
     error: suppliersError,
   } = useSuppliers()
   const [selectedSupplier, setSelectedSupplier] = useState('')
+  const [isSearchingItem, setIsSearchingItem] = useState(false)
+
   const [selectedProcuts, setSelectedProducts] = useState({})
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(20)
   const [totalPages, setTotalPages] = useState(1)
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
+  const [canCreate, setCanCreate] = useState(false)
+  const [selectedCount, setSelectedCount] = useState(0)
+  const [mercadolivreItem, setMercadoLivreItem] =
+    useState<MercadoLivreItem | null>(null)
+
+  const createSellingItem = yup.object({
+    mercadolivre_account: yup
+      .string()
+      .required('Conta do MercadoLivre obrigatória'),
+    mercadolivre_item_url: yup
+      .string()
+      .required('URL do anúncio obrigatório')
+      .url('URL inválida'),
+    mercadolivre_account_code: yup.string(),
+  })
+
+  const { getValues, setValue, register, watch, handleSubmit, formState } =
+    useForm<CreateComboSellingItemFormData>({
+      resolver: yupResolver(createSellingItem),
+      mode: 'onBlur',
+    })
+
+  const { errors } = formState
 
   const updateSearch = useCallback(
     _.debounce((searchInput) => {
@@ -67,6 +129,12 @@ export default function NewPage() {
     error: catalogError,
   } = useCatalog(page, perPage, search, selectedSupplier)
 
+  const {
+    data: integrations,
+    error,
+    isLoading: isLoadingIntegrations,
+  } = useIngrations('mercadolivre')
+
   useEffect(() => {
     updateSearch(searchInput)
   }, [searchInput])
@@ -76,6 +144,14 @@ export default function NewPage() {
       setTotalPages(Math.ceil(catalogData.totalCount / perPage))
     }
   }, [catalogData])
+
+  useEffect(() => {
+    setSelectedCount(
+      Object.values(selectedProcuts).filter(
+        (selectedProcuts) => selectedProcuts
+      ).length
+    )
+  }, [selectedProcuts])
 
   const renderProduct = (product: ProductFormated) => {
     return (
@@ -129,6 +205,57 @@ export default function NewPage() {
     )
   }
 
+  const handleSearchButtonClick: MouseEventHandler<HTMLButtonElement> =
+    async () => {
+      setIsSearchingItem(true)
+      setValue('mercadolivre_account_code', undefined)
+      try {
+        const listingUrl = getValues('mercadolivre_item_url')
+        const {
+          groups: { code },
+        } = /MLB-?(?<code>\d+)/.exec(listingUrl)
+        if (!code) {
+          throw new Error(
+            'Falha ao encontrar anúncio. Por favor verifique o url'
+          )
+        }
+        const mercadoLivreId = getValues('mercadolivre_account')
+        const { data } = await nextApi.post<getItemAPIInterface>(
+          `mercadolivre/api/items/${code}`,
+          {
+            mercadoLivreId,
+          }
+        )
+        setMercadoLivreItem(data.item)
+        setValue('mercadolivre_account_code', data.item.id)
+      } catch (error) {
+        let description: string
+        if (axios.isAxiosError(error)) {
+          switch (error.response.data.code) {
+            case 'item:invalid_account':
+              description = 'Item não pertence a conta selecionada.'
+              break
+            case 'ml_response:item_not_found':
+              description =
+                'Não foi possível encontrar esse anúncio. Por favor verifique o URL fornecido.'
+              break
+            default:
+              description = error.response.data.message
+              break
+          }
+        } else {
+          description =
+            'Falha ao carregar imagem. Verifique o URL e tente novamente.'
+        }
+        toast({
+          status: 'error',
+          description,
+        })
+      } finally {
+        setIsSearchingItem(false)
+      }
+    }
+
   return (
     <Layout>
       <Head>
@@ -146,8 +273,9 @@ export default function NewPage() {
           </Heading>
           <Stack direction="row">
             <Button
+              isDisabled={selectedCount < 2}
               onClick={() => {}}
-              size="sm"
+              size="md"
               fontSize="sm"
               colorScheme="brand"
             >
@@ -156,14 +284,51 @@ export default function NewPage() {
           </Stack>
         </Flex>
         <Stack>
-          <Box>
+          <Stack>
+            <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
+              <Select
+                {...register('mercadolivre_account')}
+                label="Conta MercadoLivre"
+                placeholder="Selecione uma conta"
+                error={errors.mercadolivre_account}
+              >
+                {!isLoadingIntegrations &&
+                  integrations.map((integration) => (
+                    <option key={integration.id} value={integration.id}>
+                      {integration.name}
+                    </option>
+                  ))}
+              </Select>
+              <Input
+                {...register('mercadolivre_item_url')}
+                label="URL do seu Anúncio"
+                type="text"
+                isDisabled={!watch('mercadolivre_account')}
+                error={errors.mercadolivre_item_url}
+                rightElement={
+                  <InputRightElement top="50%" transform="translatey(-50%)">
+                    <Button
+                      variant="solid"
+                      size="lg"
+                      isDisabled={!watch('mercadolivre_account')}
+                      colorScheme="brand"
+                      onClick={handleSearchButtonClick}
+                      isLoading={isSearchingItem}
+                    >
+                      <Icon as={RiSearchLine} />
+                    </Button>
+                  </InputRightElement>
+                }
+              />
+            </SimpleGrid>
+
             <FormLabel
               display="flex"
               alignItems="center"
               htmlFor="supplier"
               id="supplier-label"
             >
-              Fornecedor{' '}
+              Fornecedor
               <Spinner
                 hidden={!isLoadingSuppliers}
                 marginLeft="1"
@@ -186,7 +351,7 @@ export default function NewPage() {
                   </option>
                 ))}
             </Select>
-          </Box>
+          </Stack>
           {!!selectedSupplier && (
             <Stack>
               <Input
