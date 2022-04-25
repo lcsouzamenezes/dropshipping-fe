@@ -28,6 +28,9 @@ import {
   Stack,
 } from '@chakra-ui/react'
 
+import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
+import Head from 'next/head'
+import Link from 'next/link'
 import Layout from '@/components/Layout'
 import { Checkbox } from '@/components/Form/Checkbox'
 import { useListings } from '@/services/api/hooks/useListings'
@@ -35,11 +38,9 @@ import { Pagination } from '@/components/Pagination'
 import { api } from '@/services/api/apiClient'
 import { queryClient } from '@/services/queryClient'
 import { useMutation } from 'react-query'
-import Link from 'next/link'
-import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
-import Head from 'next/head'
 import { RiArrowRightLine } from 'react-icons/ri'
+import { Select } from '@/components/Form/Select'
 
 type Listing = {
   id: string
@@ -62,8 +63,12 @@ export default function ListingsPage() {
   const { isFetching, isLoading, error, data } = useListings(page, perPage)
 
   const [isOpen, setIsOpen] = useState(false)
+  const [newListenType, setNewListenType] = useState('')
   const onClose = () => setIsOpen(false)
+  const [isOpenCreateOpenModal, setIsOpenCreateOpenModal] = useState(false)
+  const onCloseCreateModal = () => setIsOpenCreateOpenModal(false)
   const cancelRef = useRef()
+  const cancelRefCreateModal = useRef()
 
   const deleteListing = useMutation<void, AxiosError>(
     async () => {
@@ -79,6 +84,10 @@ export default function ListingsPage() {
   function handleOpenDeleteModal(listing: Listing) {
     setDeletingListing(listing)
     setIsOpen(true)
+  }
+
+  function openNewListingModal() {
+    setIsOpenCreateOpenModal(true)
   }
 
   async function handleClickDeleteModalButton() {
@@ -127,12 +136,15 @@ export default function ListingsPage() {
                 Ver Catalogo
               </Button>
             </Link>
-            <Link href="/catalog" passHref>
-              <Button as="a" size="sm" fontSize="sm" colorScheme="brand">
-                <Icon as={RiAddLine} fontSize={20} mr="1" />
-                Criar
-              </Button>
-            </Link>
+            <Button
+              onClick={openNewListingModal}
+              size="sm"
+              fontSize="sm"
+              colorScheme="brand"
+            >
+              <Icon as={RiAddLine} fontSize={20} mr="1" />
+              Criar
+            </Button>
           </Stack>
         </Flex>
         {isLoading ? (
@@ -227,6 +239,53 @@ export default function ListingsPage() {
           </>
         )}
       </Box>
+
+      <AlertDialog
+        isOpen={isOpenCreateOpenModal}
+        leastDestructiveRef={cancelRefCreateModal}
+        onClose={onCloseCreateModal}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Criar novo anúncio
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              <Select
+                label="Selecione o tipo de anúncio que deseja criar"
+                onChange={(e) => setNewListenType(e.target.value)}
+                value={newListenType}
+                placeholder="Selecione o tipo de anúncio"
+                name="type"
+              >
+                <option key="simple" value="simple">
+                  Simples
+                </option>
+                <option key="combo" value="compose">
+                  Combo
+                </option>
+              </Select>
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRefCreateModal} onClick={onCloseCreateModal}>
+                Cancelar
+              </Button>
+              <Link href={`/listings/new/${newListenType}`} passHref>
+                <Button
+                  as="a"
+                  colorScheme="brand"
+                  ml={3}
+                  disabled={!newListenType}
+                >
+                  Selecionar
+                </Button>
+              </Link>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
 
       {deletingListing && (
         <AlertDialog
