@@ -1,46 +1,44 @@
-import { AxiosError } from 'axios'
-import { useRef, useState } from 'react'
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Flex,
-  Heading,
-  Spinner,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Td,
-  Th,
-  Text,
-  useBreakpointValue,
-  Button,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  Badge,
-  useToast,
-  Icon,
-  Stack,
-} from '@chakra-ui/react'
-
-import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
-import Head from 'next/head'
-import Link from 'next/link'
-import Layout from '@/components/Layout'
 import { Checkbox } from '@/components/Form/Checkbox'
-import { useListings } from '@/services/api/hooks/useListings'
+import { Select } from '@/components/Form/Select'
+import Layout from '@/components/Layout'
 import { Pagination } from '@/components/Pagination'
 import { api } from '@/services/api/apiClient'
+import { useListings } from '@/services/api/hooks/useListings'
 import { queryClient } from '@/services/queryClient'
+import {
+  Alert,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertIcon,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  Spinner,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useBreakpointValue,
+  useToast,
+} from '@chakra-ui/react'
+import { AxiosError } from 'axios'
+import Head from 'next/head'
+import Link from 'next/link'
+import { useRef, useState } from 'react'
+import { RiAddLine, RiArrowRightLine, RiFileList2Line } from 'react-icons/ri'
 import { useMutation } from 'react-query'
 import { withSSRAuth } from 'utils/withSSRAuth'
-import { RiArrowRightLine } from 'react-icons/ri'
-import { Select } from '@/components/Form/Select'
 
 type Listing = {
   id: string
@@ -259,9 +257,9 @@ export default function ListingsPage() {
                 placeholder="Selecione o tipo de anúncio"
                 name="type"
               >
-                <option key="simple" value="simple">
+                {/* <option key="simple" value="simple">
                   Simples
-                </option>
+                </option> */}
                 <option key="combo" value="compose">
                   Combo
                 </option>
