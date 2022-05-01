@@ -2,6 +2,7 @@ import { Checkbox } from '@/components/Form/Checkbox'
 import { Input } from '@/components/Form/Input'
 import { Select } from '@/components/Form/Select'
 import Layout from '@/components/Layout'
+import { api } from '@/services/api/apiClient'
 import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import { useSuppliers } from '@/services/api/hooks/useSuppliers'
@@ -30,7 +31,7 @@ import _ from 'lodash'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { MouseEventHandler, useCallback, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 import {
   RiArrowLeftCircleLine,
   RiArrowRightCircleLine,
@@ -85,7 +86,7 @@ export default function NewPage() {
   const [selectedSupplier, setSelectedSupplier] = useState('')
   const [isSearchingItem, setIsSearchingItem] = useState(false)
 
-  const [selectedProcuts, setSelectedProducts] = useState({})
+  const [selectedProducts, setSelectedProducts] = useState({})
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(20)
   const [totalPages, setTotalPages] = useState(1)
@@ -93,7 +94,7 @@ export default function NewPage() {
   const [search, setSearch] = useState('')
   const [canCreate, setCanCreate] = useState(false)
   const [selectedCount, setSelectedCount] = useState(0)
-  const [mercadolivreItem, setMercadoLivreItem] =
+  const [mercadoLivreItem, setMercadoLivreItem] =
     useState<MercadoLivreItem | null>(null)
 
   const createSellingItem = yup.object({
@@ -146,12 +147,13 @@ export default function NewPage() {
   }, [catalogData])
 
   useEffect(() => {
+    console.log(mercadoLivreItem)
     setSelectedCount(
-      Object.values(selectedProcuts).filter(
-        (selectedProcuts) => selectedProcuts
+      Object.values(selectedProducts).filter(
+        (selectedProducts) => selectedProducts
       ).length
     )
-  }, [selectedProcuts])
+  }, [selectedProducts])
 
   const renderProduct = (product: ProductFormated) => {
     return (
@@ -165,11 +167,11 @@ export default function NewPage() {
           p={2}
         >
           <Checkbox
-            isChecked={selectedProcuts[product.id] || false}
+            isChecked={selectedProducts[product.id] || false}
             onChange={() =>
               setSelectedProducts({
-                ...selectedProcuts,
-                ...{ [product.id]: !selectedProcuts[product.id] },
+                ...selectedProducts,
+                ...{ [product.id]: !selectedProducts[product.id] },
               })
             }
             colorScheme="brand"
@@ -205,9 +207,54 @@ export default function NewPage() {
     )
   }
 
+  const handleCreateComboSellingItemSubmit: SubmitHandler<CreateComboSellingItemFormData> =
+    async ({
+      mercadolivre_account_code: code,
+      mercadolivre_account: integration_id,
+    }) => {
+      const productsIds = Object.keys(selectedProducts).reduce(
+        (productIds, productId) => {
+          if (selectedProducts[productId]) {
+            productIds.push(productId)
+          }
+          return productIds
+        },
+        []
+      )
+      try {
+        await api.post('/listings/combo', {
+          code,
+          integration_id,
+          products: productsIds,
+        })
+
+        toast({
+          status: 'success',
+          variant: 'solid',
+          position: 'top',
+          title: 'Produto cadastrado com sucesso',
+        })
+
+        router.push('/listings')
+      } catch (error) {
+        let description = 'Por favor tente novamente.'
+        if (error.response?.data.code === 'create_listing:code_exists') {
+          description = 'Anúncio já cadastrado'
+        }
+        toast({
+          status: 'error',
+          variant: 'solid',
+          position: 'top',
+          title: 'Falha ao cadastrar produto.',
+          description,
+        })
+      }
+    }
+
   const handleSearchButtonClick: MouseEventHandler<HTMLButtonElement> =
     async () => {
       setIsSearchingItem(true)
+      setMercadoLivreItem(null)
       setValue('mercadolivre_account_code', undefined)
       try {
         const listingUrl = getValues('mercadolivre_item_url')
@@ -266,14 +313,22 @@ export default function NewPage() {
           key="title"
         />
       </Head>
-      <Box flex="1" className="panel" p="8">
+      <Box
+        as="form"
+        flex="1"
+        onSubmit={handleSubmit(handleCreateComboSellingItemSubmit)}
+        className="panel"
+        p="8"
+      >
         <Flex mb="8" justify="space-between" align="center">
           <Heading size="lg" fontWeight="normal">
             Criar novo anúncio "{typeMap[type]}"
           </Heading>
           <Stack direction="row">
             <Button
-              isDisabled={selectedCount < 2}
+              type="submit"
+              isLoading={formState.isSubmitting}
+              isDisabled={selectedCount < 2 || !mercadoLivreItem}
               onClick={() => {}}
               size="md"
               fontSize="sm"
@@ -285,6 +340,7 @@ export default function NewPage() {
         </Flex>
         <Stack>
           <Stack>
+            <Input type="hidden" {...register('mercadolivre_account_code')} />
             <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
               <Select
                 {...register('mercadolivre_account')}

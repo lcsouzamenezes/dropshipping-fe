@@ -1,42 +1,41 @@
-import moment from 'moment'
+import { Input } from '@/components/Form/Input'
+import { Select } from '@/components/Form/Select'
 import Layout from '@/components/Layout'
 import { Pagination } from '@/components/Pagination'
 import { SkeletonImage } from '@/components/Skeleton/SkeletonImage'
 import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
+import { useSuppliers } from '@/services/api/hooks/useSuppliers'
+import { useSuppliersAuthorizations } from '@/services/api/hooks/useSuppliersAuthorizations'
 import {
-  Box,
-  Flex,
-  Heading,
   Alert,
-  AlertTitle,
   AlertDescription,
-  Button,
-  Icon,
-  SimpleGrid,
-  Image,
-  Badge,
-  Spinner,
-  Link as ChakraLink,
-  Text,
-  Kbd,
-  InputLeftElement,
-  FormLabel,
-  Stack,
-  InputRightElement,
   AlertIcon,
+  AlertTitle,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  FormLabel,
+  Heading,
+  Icon,
+  Image,
+  InputLeftElement,
+  InputRightElement,
+  Kbd,
+  Link as ChakraLink,
+  SimpleGrid,
+  Spinner,
+  Stack,
+  Text,
   useColorModeValue,
 } from '@chakra-ui/react'
+import moment from 'moment'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { RiSearchLine, RiStarFill } from 'react-icons/ri'
-import { Input } from '@/components/Form/Input'
-import { Select } from '@/components/Form/Select'
-import { useSuppliers } from '@/services/api/hooks/useSuppliers'
-import _ from 'lodash'
-import { useRouter } from 'next/router'
 import { withSSRAuth } from 'utils/withSSRAuth'
-import { useSuppliersAuthorizations } from '@/services/api/hooks/useSuppliersAuthorizations'
 
 interface Product {
   id: string
@@ -337,20 +336,18 @@ export default function Catalog(props: CatalogProps) {
             >
               {!suppliersAuthorizations.error &&
                 !suppliersAuthorizations.isLoading &&
-                suppliersAuthorizations.data.map((supplierAuthorization) => {
-                  return (
-                    <>
-                      {supplierAuthorization.authorized && (
-                        <option
-                          key={supplierAuthorization.supplier.id}
-                          value={supplierAuthorization.supplier.id}
-                        >
-                          {supplierAuthorization.supplier.name}
-                        </option>
-                      )}
-                    </>
-                  )
-                })}
+                suppliersAuthorizations.data
+                  .filter(({ authorized }) => authorized)
+                  .map((supplierAuthorization) => {
+                    return (
+                      <option
+                        key={supplierAuthorization.supplier.id}
+                        value={supplierAuthorization.supplier.id}
+                      >
+                        {supplierAuthorization.supplier.name}
+                      </option>
+                    )
+                  })}
             </Select>
           </Flex>
         </Stack>
