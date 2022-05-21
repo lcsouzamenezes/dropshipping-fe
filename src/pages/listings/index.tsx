@@ -43,9 +43,9 @@ import { withSSRAuth } from 'utils/withSSRAuth'
 type Listing = {
   id: string
   code: string
-  product: {
+  products: Array<{
     name: string
-  }
+  }>
 }
 
 export default function ListingsPage() {
@@ -174,8 +174,8 @@ export default function ListingsPage() {
                     <Td px={['4', '4', '6']}>
                       <Checkbox colorScheme="brand" />
                     </Td>
-                    <Td>{listing.product.name}</Td>
-                    <Td>{listing.product.price}</Td>
+                    <Td>{listing.products.map((product) => product.name)}</Td>
+                    <Td>{listing.products.map((product) => product.price)}</Td>
                     <Td textAlign="center">
                       <Badge colorScheme="blue">
                         <Text isTruncated>
@@ -205,7 +205,9 @@ export default function ListingsPage() {
                       )}
                     </Td>
                     {isWideVersion && (
-                      <Td textAlign="center">{listing.product.stock}</Td>
+                      <Td textAlign="center">
+                        {listing.products.map((product) => product.stock)}
+                      </Td>
                     )}
                     <Td>
                       <Button
@@ -318,7 +320,7 @@ export default function ListingsPage() {
                 </Badge>{' '}
                 do produto{' '}
                 <Text as="span" fontWeight="bold" color="brand.500">
-                  {deletingListing.product.name}
+                  {deletingListing.products.map((product) => product.name)}
                 </Text>
                 ? Essa ação não pode ser desfeita.
               </AlertDialogBody>

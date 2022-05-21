@@ -13,7 +13,7 @@ interface Listing {
     name: string
     type: 'supplier' | 'seller'
   }
-  product: {
+  products: Array<{
     id: string
     updated_at: Date
     created_at: Date
@@ -29,7 +29,7 @@ interface Listing {
       url: string
       is_external: boolean
     }>
-  }
+  }>
   integration: {
     id: string
     provider: string
@@ -49,7 +49,7 @@ interface ListingsFormated {
     name: string
     type: 'supplier' | 'seller'
   }
-  product: {
+  products: Array<{
     id: string
     updated_at: Date
     created_at: Date
@@ -65,7 +65,7 @@ interface ListingsFormated {
       url: string
       is_external: boolean
     }>
-  }
+  }>
   integration: {
     id: string
     provider: string
@@ -91,17 +91,20 @@ async function getListings(
 
   const totalCount = Number(headers['x-total-count'])
 
-  const listings = data.map(({ product, ...rest }) => {
-    return {
-      ...rest,
-      product: {
+  const listings = data.map(({ products, ...rest }) => {
+    const productsMapped = products.map((product) => {
+      return {
         ...product,
         price: product.price.toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }),
         stock: product.stock < 0 ? (0).toFixed(2) : product.stock,
-      },
+      }
+    })
+    return {
+      ...rest,
+      products: productsMapped,
     } as ListingsFormated
   })
 
