@@ -20,7 +20,7 @@ type GetSales = Array<{
     id: string
     code: string
     active: true
-    product: {
+    products: Array<{
       id: string
       name: string
       sku: string
@@ -28,7 +28,7 @@ type GetSales = Array<{
         id: string
         name: string
       }
-    }
+    }>
     integration: {
       id: string
       description: string
@@ -56,7 +56,7 @@ export interface SaleFormated {
     id: string
     code: string
     active: true
-    product: {
+    products: Array<{
       id: string
       name: string
       sku: string
@@ -64,7 +64,7 @@ export interface SaleFormated {
         id: string
         name: string
       }
-    }
+    }>
     integration: {
       id: string
       description: string

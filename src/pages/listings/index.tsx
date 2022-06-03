@@ -1,53 +1,51 @@
-import { AxiosError } from 'axios'
-import { useRef, useState } from 'react'
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Flex,
-  Heading,
-  Spinner,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Td,
-  Th,
-  Text,
-  useBreakpointValue,
-  Button,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  Badge,
-  useToast,
-  Icon,
-  Stack,
-} from '@chakra-ui/react'
-
-import { RiFileList2Line, RiAddLine } from 'react-icons/ri'
-import Head from 'next/head'
-import Link from 'next/link'
-import Layout from '@/components/Layout'
 import { Checkbox } from '@/components/Form/Checkbox'
-import { useListings } from '@/services/api/hooks/useListings'
+import { Select } from '@/components/Form/Select'
+import Layout from '@/components/Layout'
 import { Pagination } from '@/components/Pagination'
 import { api } from '@/services/api/apiClient'
+import { useListings } from '@/services/api/hooks/useListings'
 import { queryClient } from '@/services/queryClient'
+import {
+  Alert,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertIcon,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  Spinner,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useBreakpointValue,
+  useToast,
+} from '@chakra-ui/react'
+import { AxiosError } from 'axios'
+import Head from 'next/head'
+import Link from 'next/link'
+import { useRef, useState } from 'react'
+import { RiAddLine, RiArrowRightLine, RiFileList2Line } from 'react-icons/ri'
 import { useMutation } from 'react-query'
 import { withSSRAuth } from 'utils/withSSRAuth'
-import { RiArrowRightLine } from 'react-icons/ri'
-import { Select } from '@/components/Form/Select'
 
 type Listing = {
   id: string
   code: string
-  product: {
+  products: Array<{
     name: string
-  }
+  }>
 }
 
 export default function ListingsPage() {
@@ -163,7 +161,7 @@ export default function ListingsPage() {
                   <Th px={['4', '4', '6']} color="gray.500" width="8">
                     <Checkbox colorScheme="brand" />
                   </Th>
-                  <Th>Produto</Th>
+                  <Th>Produtos</Th>
                   <Th>Preço</Th>
                   <Th textAlign="center">Integração</Th>
                   {isWideVersion && <Th textAlign="center">Estoque</Th>}
@@ -176,38 +174,44 @@ export default function ListingsPage() {
                     <Td px={['4', '4', '6']}>
                       <Checkbox colorScheme="brand" />
                     </Td>
-                    <Td>{listing.product.name}</Td>
-                    <Td>{listing.product.price}</Td>
-                    <Td textAlign="center">
-                      <Badge colorScheme="blue">
-                        <Text isTruncated>
-                          {listing.integration.description}
+                    <Td>
+                      {listing.products.map((product, index) => (
+                        <Text>
+                          {index + 1} - {product.name}
                         </Text>
-                      </Badge>
-                      {listing.parent_code ? (
-                        <Badge
-                          colorScheme="green"
-                          display="flex"
-                          alignItems="center"
-                          mt="1"
-                        >
-                          {listing.parent_code}
-                          <Icon as={RiArrowRightLine} ml="1" mr="1" />
-                          {listing.code}
+                      ))}
+                    </Td>
+                    <Td>
+                      {listing.products.map((product) => (
+                        <Text>{product.price}</Text>
+                      ))}
+                    </Td>
+                    <Td textAlign="center">
+                      <Flex direction="column" alignItems="center">
+                        <Badge colorScheme="blue">
+                          <Text isTruncated>
+                            {listing.integration.description}
+                          </Text>
                         </Badge>
-                      ) : (
-                        <Badge
-                          colorScheme="green"
-                          display="flex"
-                          alignItems="center"
-                          mt="1"
-                        >
-                          {listing.code}
-                        </Badge>
-                      )}
+                        {listing.parent_code ? (
+                          <Badge colorScheme="green" alignItems="center" mt="1">
+                            {listing.parent_code}
+                            <Icon as={RiArrowRightLine} ml="1" mr="1" />
+                            {listing.code}
+                          </Badge>
+                        ) : (
+                          <Badge colorScheme="green" alignItems="center" mt="1">
+                            {listing.code}
+                          </Badge>
+                        )}
+                      </Flex>
                     </Td>
                     {isWideVersion && (
-                      <Td textAlign="center">{listing.product.stock}</Td>
+                      <Td textAlign="center">
+                        {listing.products.map((product) => (
+                          <Text>{product.stock}</Text>
+                        ))}
+                      </Td>
                     )}
                     <Td>
                       <Button
@@ -259,9 +263,9 @@ export default function ListingsPage() {
                 placeholder="Selecione o tipo de anúncio"
                 name="type"
               >
-                <option key="simple" value="simple">
+                {/* <option key="simple" value="simple">
                   Simples
-                </option>
+                </option> */}
                 <option key="combo" value="compose">
                   Combo
                 </option>
@@ -318,9 +322,11 @@ export default function ListingsPage() {
                 <Badge colorScheme="green" variant="outline">
                   {deletingListing.code}
                 </Badge>{' '}
-                do produto{' '}
+                dos produtos{' '}
                 <Text as="span" fontWeight="bold" color="brand.500">
-                  {deletingListing.product.name}
+                  {deletingListing.products
+                    .map((product) => product.name)
+                    .join(', ')}
                 </Text>
                 ? Essa ação não pode ser desfeita.
               </AlertDialogBody>

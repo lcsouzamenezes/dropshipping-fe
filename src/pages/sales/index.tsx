@@ -1,62 +1,59 @@
+import { File } from '@/components/Form/File'
+import { Select } from '@/components/Form/Select'
+import { api } from '@/services/api/apiClient'
+import { SaleFormated, useSales } from '@/services/api/hooks/useSales'
+import { queryClient } from '@/services/queryClient'
 import {
-  Box,
-  Flex,
-  Heading,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Text,
-  useBreakpointValue,
-  Spinner,
-  Link as Chakralink,
-  useDisclosure,
-  useToast,
   Alert,
   AlertIcon,
-  Button,
-  Stack,
   Badge,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Box,
+  Button,
+  Flex,
+  Heading,
   Icon,
+  IconButton,
+  Link as Chakralink,
   Menu,
   MenuButton,
-  MenuList,
-  MenuItem,
   MenuDivider,
-  IconButton,
-  Center,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Spinner,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useBreakpointValue,
+  useDisclosure,
+  useToast,
 } from '@chakra-ui/react'
-import Link from 'next/link'
-import { Pagination } from '../../components/Pagination'
-import { Header } from '../../components/Header'
-import { Sidebar } from '../../components/Sidebar'
-import { useState } from 'react'
-import { withSSRAuth } from 'utils/withSSRAuth'
-import { api } from '@/services/api/apiClient'
-import { Checkbox } from '@/components/Form/Checkbox'
-import { queryClient } from '@/services/queryClient'
-import Head from 'next/head'
-import { SaleFormated, useSales } from '@/services/api/hooks/useSales'
-import { File } from '@/components/Form/File'
-import { SubmitHandler, useForm } from 'react-hook-form'
 import { useAuth } from 'context/AuthContext'
+import Head from 'next/head'
+import Link from 'next/link'
+import { useState } from 'react'
+import { SubmitHandler, useForm } from 'react-hook-form'
 import {
-  RiTruckLine,
-  RiMenuLine,
-  RiFileCopy2Line,
   RiCloseLine,
   RiDownloadLine,
+  RiFileCopy2Line,
+  RiMenuLine,
 } from 'react-icons/ri'
-import { Select } from '@/components/Form/Select'
+import { withSSRAuth } from 'utils/withSSRAuth'
+import { Header } from '../../components/Header'
+import { Pagination } from '../../components/Pagination'
+import { Sidebar } from '../../components/Sidebar'
 
 interface SendFilesFormData {
   receipt: FileList
@@ -336,30 +333,48 @@ export default function SalesPage() {
                         </Td> */}
                         <Td>
                           <Box>
-                            <Link
-                              href={`/listings/${sale.listing.id}`}
-                              passHref
-                            >
-                              <Chakralink
-                                onMouseEnter={() => handlePrefetchSale(sale.id)}
-                                color="brand.500"
-                              >
-                                <Text fontSize="sm" fontWeight="bold">
-                                  {sale.listing.product.name}
+                            {sale.listing.products.map((product) => (
+                              <>
+                                <Link
+                                  href={`/listings/${sale.listing.id}`}
+                                  passHref
+                                >
+                                  <Chakralink
+                                    onMouseEnter={() =>
+                                      handlePrefetchSale(sale.id)
+                                    }
+                                    color="brand.500"
+                                  >
+                                    <Text fontSize="sm" fontWeight="bold">
+                                      {product.name}
+                                    </Text>
+                                  </Chakralink>
+                                </Link>
+                                <Text fontSize="xs" color="gray.500">
+                                  ({product.sku})
                                 </Text>
-                              </Chakralink>
-                            </Link>
-                            <Text fontSize="xs" color="gray.500">
-                              ({sale.listing.product.sku})
-                            </Text>
+                              </>
+                            ))}
                           </Box>
                         </Td>
                         <Td>
                           {user?.roles.includes('supplier')
                             ? sale.account.name
-                            : sale.listing.product.account.name}
+                            : sale.listing.products[0].account.name}
                         </Td>
-                        <Td>{sale.quantity}</Td>
+                        <Td position="relative">
+                          <Flex
+                            direction="column"
+                            position="absolute"
+                            alignItems="center"
+                            justifyContent="space-around"
+                            inset="0"
+                          >
+                            {sale.listing.products.map((product) => (
+                              <Flex>{sale.quantity}</Flex>
+                            ))}
+                          </Flex>
+                        </Td>
                         <Td>
                           {!sale.receipt ||
                             (!sale.label && (
@@ -417,6 +432,7 @@ export default function SalesPage() {
                 if (['pending', 'done'].includes(status)) return
                 return (
                   <option
+                    key={status}
                     selected={selectedSale?.status === status}
                     value={status}
                   >
