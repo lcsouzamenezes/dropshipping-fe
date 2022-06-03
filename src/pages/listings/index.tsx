@@ -161,7 +161,7 @@ export default function ListingsPage() {
                   <Th px={['4', '4', '6']} color="gray.500" width="8">
                     <Checkbox colorScheme="brand" />
                   </Th>
-                  <Th>Produto</Th>
+                  <Th>Produtos</Th>
                   <Th>Preço</Th>
                   <Th textAlign="center">Integração</Th>
                   {isWideVersion && <Th textAlign="center">Estoque</Th>}
@@ -174,39 +174,43 @@ export default function ListingsPage() {
                     <Td px={['4', '4', '6']}>
                       <Checkbox colorScheme="brand" />
                     </Td>
-                    <Td>{listing.products.map((product) => product.name)}</Td>
-                    <Td>{listing.products.map((product) => product.price)}</Td>
-                    <Td textAlign="center">
-                      <Badge colorScheme="blue">
-                        <Text isTruncated>
-                          {listing.integration.description}
+                    <Td>
+                      {listing.products.map((product, index) => (
+                        <Text>
+                          {index + 1} - {product.name}
                         </Text>
-                      </Badge>
-                      {listing.parent_code ? (
-                        <Badge
-                          colorScheme="green"
-                          display="flex"
-                          alignItems="center"
-                          mt="1"
-                        >
-                          {listing.parent_code}
-                          <Icon as={RiArrowRightLine} ml="1" mr="1" />
-                          {listing.code}
+                      ))}
+                    </Td>
+                    <Td>
+                      {listing.products.map((product) => (
+                        <Text>{product.price}</Text>
+                      ))}
+                    </Td>
+                    <Td textAlign="center">
+                      <Flex direction="column" alignItems="center">
+                        <Badge colorScheme="blue">
+                          <Text isTruncated>
+                            {listing.integration.description}
+                          </Text>
                         </Badge>
-                      ) : (
-                        <Badge
-                          colorScheme="green"
-                          display="flex"
-                          alignItems="center"
-                          mt="1"
-                        >
-                          {listing.code}
-                        </Badge>
-                      )}
+                        {listing.parent_code ? (
+                          <Badge colorScheme="green" alignItems="center" mt="1">
+                            {listing.parent_code}
+                            <Icon as={RiArrowRightLine} ml="1" mr="1" />
+                            {listing.code}
+                          </Badge>
+                        ) : (
+                          <Badge colorScheme="green" alignItems="center" mt="1">
+                            {listing.code}
+                          </Badge>
+                        )}
+                      </Flex>
                     </Td>
                     {isWideVersion && (
                       <Td textAlign="center">
-                        {listing.products.map((product) => product.stock)}
+                        {listing.products.map((product) => (
+                          <Text>{product.stock}</Text>
+                        ))}
                       </Td>
                     )}
                     <Td>
@@ -318,9 +322,11 @@ export default function ListingsPage() {
                 <Badge colorScheme="green" variant="outline">
                   {deletingListing.code}
                 </Badge>{' '}
-                do produto{' '}
+                dos produtos{' '}
                 <Text as="span" fontWeight="bold" color="brand.500">
-                  {deletingListing.products.map((product) => product.name)}
+                  {deletingListing.products
+                    .map((product) => product.name)
+                    .join(', ')}
                 </Text>
                 ? Essa ação não pode ser desfeita.
               </AlertDialogBody>
