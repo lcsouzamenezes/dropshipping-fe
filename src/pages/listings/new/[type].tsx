@@ -147,7 +147,6 @@ export default function NewPage() {
   }, [catalogData])
 
   useEffect(() => {
-    console.log(mercadoLivreItem)
     setSelectedCount(
       Object.values(selectedProducts).filter(
         (selectedProducts) => selectedProducts
