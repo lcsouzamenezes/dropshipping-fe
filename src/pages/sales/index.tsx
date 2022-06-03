@@ -333,30 +333,48 @@ export default function SalesPage() {
                         </Td> */}
                         <Td>
                           <Box>
-                            <Link
-                              href={`/listings/${sale.listing.id}`}
-                              passHref
-                            >
-                              <Chakralink
-                                onMouseEnter={() => handlePrefetchSale(sale.id)}
-                                color="brand.500"
-                              >
-                                <Text fontSize="sm" fontWeight="bold">
-                                  {sale.listing.product.name}
+                            {sale.listing.products.map((product) => (
+                              <>
+                                <Link
+                                  href={`/listings/${sale.listing.id}`}
+                                  passHref
+                                >
+                                  <Chakralink
+                                    onMouseEnter={() =>
+                                      handlePrefetchSale(sale.id)
+                                    }
+                                    color="brand.500"
+                                  >
+                                    <Text fontSize="sm" fontWeight="bold">
+                                      {product.name}
+                                    </Text>
+                                  </Chakralink>
+                                </Link>
+                                <Text fontSize="xs" color="gray.500">
+                                  ({product.sku})
                                 </Text>
-                              </Chakralink>
-                            </Link>
-                            <Text fontSize="xs" color="gray.500">
-                              ({sale.listing.product.sku})
-                            </Text>
+                              </>
+                            ))}
                           </Box>
                         </Td>
                         <Td>
                           {user?.roles.includes('supplier')
                             ? sale.account.name
-                            : sale.listing.product.account.name}
+                            : sale.listing.products[0].account.name}
                         </Td>
-                        <Td>{sale.quantity}</Td>
+                        <Td position="relative">
+                          <Flex
+                            direction="column"
+                            position="absolute"
+                            alignItems="center"
+                            justifyContent="space-around"
+                            inset="0"
+                          >
+                            {sale.listing.products.map((product) => (
+                              <Flex>{sale.quantity}</Flex>
+                            ))}
+                          </Flex>
+                        </Td>
                         <Td>
                           {!sale.receipt ||
                             (!sale.label && (

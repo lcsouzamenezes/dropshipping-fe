@@ -2,10 +2,7 @@ import { Checkbox } from '@/components/Form/Checkbox'
 import { Input } from '@/components/Form/Input'
 import { Select } from '@/components/Form/Select'
 import Layout from '@/components/Layout'
-<<<<<<< HEAD
 import { api } from '@/services/api/apiClient'
-=======
->>>>>>> origin
 import { ProductFormated, useCatalog } from '@/services/api/hooks/useCatalog'
 import { useIngrations } from '@/services/api/hooks/useIntegrations'
 import { useSuppliers } from '@/services/api/hooks/useSuppliers'
@@ -34,11 +31,7 @@ import _ from 'lodash'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { MouseEventHandler, useCallback, useEffect, useState } from 'react'
-<<<<<<< HEAD
 import { SubmitHandler, useForm } from 'react-hook-form'
-=======
-import { useForm } from 'react-hook-form'
->>>>>>> origin
 import {
   RiArrowLeftCircleLine,
   RiArrowRightCircleLine,
@@ -93,11 +86,7 @@ export default function NewPage() {
   const [selectedSupplier, setSelectedSupplier] = useState('')
   const [isSearchingItem, setIsSearchingItem] = useState(false)
 
-<<<<<<< HEAD
   const [selectedProducts, setSelectedProducts] = useState({})
-=======
-  const [selectedProcuts, setSelectedProducts] = useState({})
->>>>>>> origin
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(20)
   const [totalPages, setTotalPages] = useState(1)
@@ -105,11 +94,7 @@ export default function NewPage() {
   const [search, setSearch] = useState('')
   const [canCreate, setCanCreate] = useState(false)
   const [selectedCount, setSelectedCount] = useState(0)
-<<<<<<< HEAD
   const [mercadoLivreItem, setMercadoLivreItem] =
-=======
-  const [mercadolivreItem, setMercadoLivreItem] =
->>>>>>> origin
     useState<MercadoLivreItem | null>(null)
 
   const createSellingItem = yup.object({
@@ -162,22 +147,12 @@ export default function NewPage() {
   }, [catalogData])
 
   useEffect(() => {
-<<<<<<< HEAD
-    console.log(mercadoLivreItem)
     setSelectedCount(
       Object.values(selectedProducts).filter(
         (selectedProducts) => selectedProducts
       ).length
     )
   }, [selectedProducts])
-=======
-    setSelectedCount(
-      Object.values(selectedProcuts).filter(
-        (selectedProcuts) => selectedProcuts
-      ).length
-    )
-  }, [selectedProcuts])
->>>>>>> origin
 
   const renderProduct = (product: ProductFormated) => {
     return (
@@ -191,19 +166,11 @@ export default function NewPage() {
           p={2}
         >
           <Checkbox
-<<<<<<< HEAD
             isChecked={selectedProducts[product.id] || false}
             onChange={() =>
               setSelectedProducts({
                 ...selectedProducts,
                 ...{ [product.id]: !selectedProducts[product.id] },
-=======
-            isChecked={selectedProcuts[product.id] || false}
-            onChange={() =>
-              setSelectedProducts({
-                ...selectedProcuts,
-                ...{ [product.id]: !selectedProcuts[product.id] },
->>>>>>> origin
               })
             }
             colorScheme="brand"
@@ -239,7 +206,6 @@ export default function NewPage() {
     )
   }
 
-<<<<<<< HEAD
   const handleCreateComboSellingItemSubmit: SubmitHandler<CreateComboSellingItemFormData> =
     async ({
       mercadolivre_account_code: code,
@@ -288,11 +254,6 @@ export default function NewPage() {
     async () => {
       setIsSearchingItem(true)
       setMercadoLivreItem(null)
-=======
-  const handleSearchButtonClick: MouseEventHandler<HTMLButtonElement> =
-    async () => {
-      setIsSearchingItem(true)
->>>>>>> origin
       setValue('mercadolivre_account_code', undefined)
       try {
         const listingUrl = getValues('mercadolivre_item_url')
@@ -351,7 +312,6 @@ export default function NewPage() {
           key="title"
         />
       </Head>
-<<<<<<< HEAD
       <Box
         as="form"
         flex="1"
@@ -359,22 +319,15 @@ export default function NewPage() {
         className="panel"
         p="8"
       >
-=======
-      <Box flex="1" className="panel" p="8">
->>>>>>> origin
         <Flex mb="8" justify="space-between" align="center">
           <Heading size="lg" fontWeight="normal">
             Criar novo anúncio "{typeMap[type]}"
           </Heading>
           <Stack direction="row">
             <Button
-<<<<<<< HEAD
               type="submit"
               isLoading={formState.isSubmitting}
               isDisabled={selectedCount < 2 || !mercadoLivreItem}
-=======
-              isDisabled={selectedCount < 2}
->>>>>>> origin
               onClick={() => {}}
               size="md"
               fontSize="sm"
@@ -386,10 +339,7 @@ export default function NewPage() {
         </Flex>
         <Stack>
           <Stack>
-<<<<<<< HEAD
             <Input type="hidden" {...register('mercadolivre_account_code')} />
-=======
->>>>>>> origin
             <SimpleGrid minChildWidth="240px" spacing="8" w="100%">
               <Select
                 {...register('mercadolivre_account')}
