@@ -77,6 +77,9 @@ interface DashboardProps {
       id: string
     }
   } | null
+  salesMetric: {
+    salesCount: number
+  }
 }
 
 export default function Dashboard(props: DashboardProps) {
@@ -88,7 +91,7 @@ export default function Dashboard(props: DashboardProps) {
       </Head>
       <Flex w="100%" direction="column">
         {!props.profile?.profile?.id && (
-          <Link href="profile" passHref>
+          <Link href="/profile" passHref>
             <Alert as="a" status="warning" mb="2" borderRadius="base">
               <AlertIcon />
               <AlertTitle>Próximos passos:</AlertTitle>
@@ -105,7 +108,7 @@ export default function Dashboard(props: DashboardProps) {
           </Stat>
           <Stat p={['2', '4']} className="panel">
             <StatLabel>Vendas do Mês</StatLabel>
-            <StatNumber>12</StatNumber>
+            <StatNumber>{props.salesMetric.salesCount ?? 0}</StatNumber>
             <StatHelpText>Fevereiro</StatHelpText>
           </Stat>
           <Stat p={['2', '4']} className="panel">
@@ -143,16 +146,22 @@ export const getServerSideProps = withSSRAuth(
     const apiClient = setupAPIClient(ctx)
 
     let profile = null
+    let salesMetric = null
     try {
-      const { data } = await apiClient.get(`/profiles`)
-      profile = data
-    } catch (error) {}
+      const { data: profileData } = await apiClient.get(`/profiles`)
+      const { data: salesMetricsData } = await apiClient.get(`/metrics/sales`)
+      profile = profileData
+      salesMetric = salesMetricsData
+    } catch (error) {
+      console.error(error)
+    }
 
     // const response = await apiClient.get('users/me');
     return {
       props: {
         cookies: ctx.req.headers.cookie ?? '',
-        profile: profile,
+        profile,
+        salesMetric,
       },
     }
   },
