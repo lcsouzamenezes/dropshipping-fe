@@ -1,21 +1,25 @@
+import { setupAPIClient } from '@/services/api/api'
 import {
-  Flex,
-  SimpleGrid,
-  Box,
-  Text,
-  theme,
   Alert,
   AlertIcon,
   AlertTitle,
+  Box,
+  Flex,
   Icon,
+  SimpleGrid,
+  Stat,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
+  Text,
+  theme,
 } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import Layout from '../components/Layout'
-import { withSSRAuth } from '../utils/withSSRAuth'
 import Link from 'next/link'
 import { RiLinksLine } from 'react-icons/ri'
-import { setupAPIClient } from '@/services/api/api'
+import Layout from '../components/Layout'
+import { withSSRAuth } from '../utils/withSSRAuth'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -93,6 +97,28 @@ export default function Dashboard(props: DashboardProps) {
             </Alert>
           </Link>
         )}
+        <SimpleGrid columns={[1, 2, 4]} spacing={4} mb={4}>
+          <Stat p={['2', '4']} className="panel">
+            <StatLabel>Faturamento</StatLabel>
+            <StatNumber>R$0,00</StatNumber>
+            <StatHelpText>Fevereiro</StatHelpText>
+          </Stat>
+          <Stat p={['2', '4']} className="panel">
+            <StatLabel>Vendas do Mês</StatLabel>
+            <StatNumber>12</StatNumber>
+            <StatHelpText>Fevereiro</StatHelpText>
+          </Stat>
+          <Stat p={['2', '4']} className="panel">
+            <StatLabel>Fornecedores</StatLabel>
+            <StatNumber>120</StatNumber>
+            <StatHelpText>Ativos</StatHelpText>
+          </Stat>
+          <Stat p={['2', '4']} className="panel">
+            <StatLabel>Anúncios</StatLabel>
+            <StatNumber>110</StatNumber>
+            <StatHelpText>Ativos</StatHelpText>
+          </Stat>
+        </SimpleGrid>
         <SimpleGrid flex="1" gap="4" minChildWidth="320px" align="flex-start">
           <Box p={['6', '8']} className="panel" /* pb="4" */>
             <Text fontSize="lg" mb="4">

@@ -5,27 +5,25 @@ import { api } from '@/services/api/apiClient'
 import { Supplier, useSuppliers } from '@/services/api/hooks/useSuppliers'
 import { useSuppliersAuthorizations } from '@/services/api/hooks/useSuppliersAuthorizations'
 import {
-  Box,
-  Flex,
-  Heading,
-  Spinner,
-  Image,
-  SimpleGrid,
-  Button,
-  Stack,
-  useToast,
   Alert,
+  AlertDescription,
   AlertIcon,
   AlertTitle,
-  Icon,
-  Text,
-  AlertDescription,
   Badge,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Image,
+  SimpleGrid,
+  Spinner,
+  Stack,
+  Text,
+  useToast,
 } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { RiLinksLine } from 'react-icons/ri'
 import { withSSRAuth } from 'utils/withSSRAuth'
 
 interface SuppliersPageProps {
@@ -208,6 +206,17 @@ export default function SuppliersPage(props: SuppliersPageProps) {
     )
   }
 
+  function renderNoSuppliersAlert() {
+    return (
+      <Alert>
+        <AlertDescription display="flex" flexDirection="row">
+          <AlertIcon />
+          Nenhum dado encontrado.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
   return (
     <Layout>
       <Head>
@@ -256,6 +265,8 @@ export default function SuppliersPage(props: SuppliersPageProps) {
                   </Link>
                 </AlertDescription>
               </Alert>
+            ) : data?.totalCount === 0 ? (
+              renderNoSuppliersAlert()
             ) : (
               <SimpleGrid columns={[1, 2, 3, 4]} spacing={6}>
                 {data?.suppliers.map((supplier) => renderSupplier(supplier))}

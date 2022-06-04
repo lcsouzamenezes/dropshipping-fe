@@ -34,7 +34,9 @@ async function getSuppliers(
     },
   })
 
-  const totalCount = Number(headers['x-total-count'])
+  const totalCount = headers['x-total-count']
+    ? Number(headers['x-total-count'])
+    : 0
 
   const suppliers = data.map(
     (supplier) =>
