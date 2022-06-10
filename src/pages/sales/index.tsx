@@ -334,7 +334,7 @@ export default function SalesPage() {
                         <Td>
                           <Box>
                             {sale.listing.products.map((product) => (
-                              <>
+                              <div key={product.id}>
                                 <Link
                                   href={`/listings/${sale.listing.id}`}
                                   passHref
@@ -353,7 +353,7 @@ export default function SalesPage() {
                                 <Text fontSize="xs" color="gray.500">
                                   ({product.sku})
                                 </Text>
-                              </>
+                              </div>
                             ))}
                           </Box>
                         </Td>
@@ -371,7 +371,7 @@ export default function SalesPage() {
                             inset="0"
                           >
                             {sale.listing.products.map((product) => (
-                              <Flex>{sale.quantity}</Flex>
+                              <Flex key={product.id}>{sale.quantity}</Flex>
                             ))}
                           </Flex>
                         </Td>

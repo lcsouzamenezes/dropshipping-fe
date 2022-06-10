@@ -108,7 +108,7 @@ export default function Dashboard(props: DashboardProps) {
           </Stat>
           <Stat p={['2', '4']} className="panel">
             <StatLabel>Vendas do Mês</StatLabel>
-            <StatNumber>{props.salesMetric.salesCount ?? 0}</StatNumber>
+            <StatNumber>{props.salesMetric?.salesCount ?? 0}</StatNumber>
             <StatHelpText>Fevereiro</StatHelpText>
           </Stat>
           <Stat p={['2', '4']} className="panel">
